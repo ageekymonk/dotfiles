@@ -1,5 +1,13 @@
+- name: Install kubectl
+  community.general.pacman: name=kubectl state=present
+  become: yes
+  become_user: root
+  become_method: sudo
+
 - name: Install kubectx
   community.general.pacman: name=kubectx state=present
   become: yes
   become_user: root
   become_method: sudo
+
+- aur: name=lens-bin
