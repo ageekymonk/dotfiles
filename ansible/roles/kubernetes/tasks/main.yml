@@ -1,0 +1,5 @@
+- name: Install kubectx
+  community.general.pacman: name=kubectx state=present
+  become: yes
+  become_user: root
+  become_method: sudo

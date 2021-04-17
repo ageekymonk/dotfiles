@@ -1,0 +1,9 @@
+- name: Set up local workstation
+  hosts: local
+  roles:
+    - role: kubernetes
+      tags:
+        - kubernetes
+    - role: zsh
+      tags:
+        - zsh
