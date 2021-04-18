@@ -1,0 +1,11 @@
+- name: Install terraform
+  community.general.pacman: name=terraform state=present
+  become: yes
+  become_user: root
+  become_method: sudo
+
+- name: Clone asdf repository
+  git:
+    repo: git@github.com:asdf-vm/asdf.git
+    dest: "~/.asdf"
+    version: v0.8.0
