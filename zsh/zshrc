@@ -138,6 +138,10 @@ source $ZSH_CUSTOM/zshalias
 
 # Enable Ctrl-x-e to edit command line
 fpath=(~/.oh-my-zsh/custom/plugins/oc $fpath)
+
+. $HOME/.asdf/asdf.sh
+fpath=(${ASDF_DIR}/completions $fpath)
+
 autoload -U +X compinit && compinit
 autoload -U +X bashcompinit && bashcompinit
 

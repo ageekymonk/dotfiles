@@ -9,9 +9,17 @@ OS := $(shell uname -s)
 .PHONY: help zsh kubernetes
 
 
+base: ## Deploy ansible playbook for base
+	echo "Deploying zsh playbook"
+	ansible-playbook -i $(CONFIG_ROOT)/ansible/hosts $(CONFIG_ROOT)/ansible/dotfiles.yml --ask-become-pass --tags base
+
 kubernetes: ## Deploy ansible playbook for kubernetes
 	echo "Deploying zsh playbook"
 	ansible-playbook -i $(CONFIG_ROOT)/ansible/hosts $(CONFIG_ROOT)/ansible/dotfiles.yml --ask-become-pass --tags kubernetes
+
+devops: ## Deploy ansible playbook for devops
+	echo "Deploying zsh playbook"
+	ansible-playbook -i $(CONFIG_ROOT)/ansible/hosts $(CONFIG_ROOT)/ansible/dotfiles.yml --ask-become-pass --tags devops
 
 zsh: ## Deploy ansible playbook for zsh
 	echo "Deploying zsh playbook"

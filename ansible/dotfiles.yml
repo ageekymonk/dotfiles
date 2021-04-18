@@ -1,9 +1,15 @@
 - name: Set up local workstation
   hosts: local
   roles:
+    - role: base
+      tags:
+        - base
     - role: kubernetes
       tags:
         - kubernetes
+    - role: devops
+      tags:
+        - devops
     - role: zsh
       tags:
         - zsh
