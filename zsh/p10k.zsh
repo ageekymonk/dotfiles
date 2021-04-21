@@ -654,7 +654,7 @@ fi
   #
   # Type `p10k help segment` for documentation and a more sophisticated example.
   function prompt_awscontext() {
-      local profile="${AWS_PROFILE:=default}"
+      local profile="${AWS_VAULT:=default}"
       p10k segment -f 208 -t "%{$fg_bold[blue]%}aws:(%{$fg[yellow]%}${profile}%{$fg_bold[blue]%})%{$reset_color%}"
   }
   # User-defined prompt segments can be customized the same way as built-in segments.

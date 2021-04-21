@@ -4,8 +4,18 @@
   become_user: root
   become_method: sudo
 
+- name: Install aws-vault
+  community.general.pacman: name=aws-vault state=present
+  become: yes
+  become_user: root
+  become_method: sudo
+
 - name: Clone asdf repository
   git:
     repo: git@github.com:asdf-vm/asdf.git
     dest: "~/.asdf"
     version: v0.8.0
+
+- aur: name=aws-cli-v2-bin
+- aur: name=azure-cli
+

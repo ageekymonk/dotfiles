@@ -1,1 +1,22 @@
 - aur: name=notion-app
+- aur: name=wavebox
+- aur: name=vpn-slice-git
+- aur: name=direnv
+
+- name: Install openconnect
+  community.general.pacman: name=openconnect state=present
+  become: yes
+  become_user: root
+  become_method: sudo
+
+- name: Install dnsmasq
+  community.general.pacman: name=dnsmasq state=present
+  become: yes
+  become_user: root
+  become_method: sudo
+
+- name: Install networkmanager-openconnect
+  community.general.pacman: name=networkmanager-openconnect state=present
+  become: yes
+  become_user: root
+  become_method: sudo

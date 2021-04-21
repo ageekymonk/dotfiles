@@ -11,3 +11,4 @@
   become_method: sudo
 
 - aur: name=lens-bin
+- aur: name=origin-client
