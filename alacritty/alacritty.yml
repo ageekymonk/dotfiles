@@ -147,7 +147,7 @@ font:
     style: Bold Italic
 
   # point size
-  size: 14.0
+  size: 13.0
 
   # offset is the extra space around each character. `offset.y` can be thought of
   # as modifying the line spacing, and `offset.x` as modifying the letter spacing.
@@ -406,7 +406,7 @@ cursor:
   # the style of the active value of the normal cursor.
   #
   # See `cursor.style` for available options.
-  #vi_mode_style: None
+  vi_mode_style: Underline
 
   # If this is `true`, the cursor will be rendered as a hollow box when the
   # window is not focused.
@@ -417,7 +417,7 @@ cursor:
   #thickness: 0.15
 
 # Live config reload (changes require restart)
-#live_config_reload: true
+live_config_reload: true
 
 # Shell
 #
@@ -753,7 +753,7 @@ key_bindings:
 
   # (Windows, Linux, and BSD only)
   #- { key: V,              mods: Control|Shift,           action: Paste            }
-  #- { key: C,              mods: Control|Shift,           action: Copy             }
+  - { key: C,              mods: Control|Shift,           action: Copy             }
   #- { key: F,              mods: Control|Shift,           action: SearchForward    }
   #- { key: B,              mods: Control|Shift,           action: SearchBackward   }
   #- { key: C,              mods: Control|Shift, mode: Vi, action: ClearSelection   }
@@ -784,7 +784,7 @@ key_bindings:
   #- { key: M,              mods: Command,            action: Minimize         }
   #- { key: Q,              mods: Command,            action: Quit             }
   #- { key: W,              mods: Command,            action: Quit             }
-  - { key: N,              mods: Command,            action: SpawnNewInstance }
+  # - { key: N,              mods: Command,            action: SpawnNewInstance }
   #- { key: F,              mods: Command|Control,    action: ToggleFullscreen }
   #- { key: F,              mods: Command,            action: SearchForward    }
   #- { key: B,              mods: Command,            action: SearchBackward   }
