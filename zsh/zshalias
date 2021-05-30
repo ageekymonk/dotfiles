@@ -19,6 +19,9 @@ alias flush="sudo killall -HUP mDNSResponder;sudo killall mDNSResponderHelper;su
 # Usage: `mergepdf -o output.pdf input{1,2,3}.pdf`
 alias mergepdf='/System/Library/Automator/Combine\ PDF\ Pages.action/Contents/Resources/join.py'
 
+# git aliases
+alias gitcontributors='git log --format="%aN" | sort -u'
+
 # Emacs Aliases
 function vterm_printf(){
     if [ -n "$TMUX" ]; then
@@ -84,7 +87,7 @@ bup() {
   fi
 }
 
-brp() {
+bcp() {
   local uninst=$(brew leaves | fzf -m)
 
   if [[ $uninst ]]; then
@@ -499,6 +502,10 @@ alias kdiff="kustomize build | kubectl diff -f -"
 alias kgsecreg='kgsec registry -o yaml | yq r - "data.[.dockerconfigjson]" | base64 -d'
 alias kubeclean="kubectl config get-contexts | peco | awk '{ print \$1 }' | xargs -I _ kubectl config delete-context _"
 alias kdebug="kubectl run tmp-shell --rm -i --tty --image nicolaka/netshoot -- /bin/bash"
+alias krmpo="kubectl get pods | peco | awk '{ print \$1 }' | xargs -I _ kubectl delete pods _"
+alias kgpoy="kubectl get pods | peco | awk '{ print \$1 }' | xargs -I _ kubectl get pods _ -o yaml"
+alias kdpo="kubectl get pods | peco | awk '{ print \$1 }' | xargs -I _ kubectl describe pods _"
+alias klo="kubectl get pods | peco | awk '{ print \$1 }' | xargs -I _ kubectl logs -f _"
 
 ks() {
     local cluster=$(kubectl config get-contexts -o name | fzf -q "$1")

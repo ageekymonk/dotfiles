@@ -2,21 +2,40 @@
 - aur: name=wavebox
 - aur: name=vpn-slice-git
 - aur: name=direnv
+- aur: name=remmina-plugin-rdesktop
+- aur: name=google-chrome
+- aur: name=peco
+- aur: name=fzf-git
+- aur: name=wavebox
+- aur: name=zoxide-bin
 
-- name: Install openconnect
-  community.general.pacman: name=openconnect state=present
+- name: Install base packages
+  community.general.pacman:
+    name: "{{ item }}"
+    state: present
   become: yes
   become_user: root
   become_method: sudo
+  loop:
+    - openconnect
+    - dnsmasq
+    - networkmanager-openconnect
+    - rdesktop
+    - remmina
+    - python-poetry
+    - yubioath-desktop
+    - ccid
+    - cups
+    - hplip
+    - httpie
+    - python-pip
+    - graphviz
 
-- name: Install dnsmasq
-  community.general.pacman: name=dnsmasq state=present
-  become: yes
-  become_user: root
-  become_method: sudo
-
-- name: Install networkmanager-openconnect
-  community.general.pacman: name=networkmanager-openconnect state=present
+- name: Enable a cups
+  ansible.builtin.systemd:
+    name: cups
+    state: started
+    enabled: yes
   become: yes
   become_user: root
   become_method: sudo
