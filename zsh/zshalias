@@ -263,9 +263,10 @@ function delete-snapshots() {
           [Tags[?Key=='Name'].Value][0][0],
           State,
           Encrypted,
+          StartTime,
           Description
         ]" |
-        sort -k 1 |
+        sort -k 5 |
         column -s$'\t' -t | peco | awk '{ print $1 }' | xargs -I {} aws ec2 delete-snapshot --snapshot-id {}
 }
 
@@ -321,6 +322,7 @@ function efs-recovery-points() {
 
 # IAM
 function iam-policy() {
+    export AWS_PAGER=""
     aws iam list-policies \
         --output text       \
         --query '
@@ -371,9 +373,9 @@ function disable-health-check() {
     aws route53 list-health-checks \
         --output text               \
         --query "
-      HealthChecks[].[
-        Id,
-        HealthCheckConfig.FullyQualifiedDomainName
+      healthchecks[].[
+        id,
+        healthcheckconfig.fullyqualifieddomainname
       ]"                |
         sort -k 4             |
         column -s$'\t' -t | peco | awk '{ print $1 }' | xargs -I {} aws route53 update-health-check --health-check-id {} --disabled
@@ -428,6 +430,29 @@ subnet-add-tag() {
     name=$1
     value=$2
     subnets | peco | awk '{ print $1 }' | xargs -I {} aws ec2 create-tags --resources {} --tags Key=$1,Value=$2
+}
+
+cloudfront-add-ip() {
+
+    local prefixlist=($(aws ec2 describe-managed-prefix-lists \
+                         --output text        \
+                         --query "
+                               PrefixLists[].[
+                               PrefixListName,
+                               PrefixListId,
+                               AddressFamily
+                                             ]"                |
+                         grep -E -- "$filters" |
+                         column -t | peco | awk '{ print $2 }' ))
+
+    local pversion=$(aws ec2 describe-managed-prefix-lists --prefix-list-ids ${prefixlist} | jq -c -r '.PrefixLists[0].Version')
+    echo ${pversion}
+
+    curl http://d7uri8nf7uskq.cloudfront.net/tools/list-cloudfront-ips | jq -r -c '.CLOUDFRONT_GLOBAL_IP_LIST[]' | peco | awk '{ print $1 }' | while read line; do
+        aws ec2 modify-managed-prefix-list --prefix-list-id ${prefixlist} --add-entries Cidr=${line} --current-version ${pversion}
+        pversion=$((pversion+1))
+    done
+
 }
 
 # Azure
