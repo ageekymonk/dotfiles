@@ -16,7 +16,6 @@ create-assume-role =
         }";
   }; f
 
-
 ri = ec2 describe-instances \
     --filter Name=instance-state-name,Values=running \
     --output table \

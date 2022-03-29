@@ -1,14 +1,17 @@
-- name: Install terraform
-  community.general.pacman: name=terraform state=present
+- name: Install base packages
+  community.general.pacman:
+    name: "{{ item }}"
+    state: present
   become: yes
   become_user: root
   become_method: sudo
-
-- name: Install aws-vault
-  community.general.pacman: name=aws-vault state=present
-  become: yes
-  become_user: root
-  become_method: sudo
+  loop:
+    - terraform
+    - aws-vault
+    - vault
+    - step-cli
+    - eksctl
+    - mkcert
 
 - name: Clone asdf repository
   git:
@@ -18,4 +21,7 @@
 
 - aur: name=aws-cli-v2-bin
 - aur: name=azure-cli
-
+- aur: name=usql
+- aur: name=saml2aws-bin
+- aur: name=aws-session-manager-plugin
+- aur: name=aws-sam-cli

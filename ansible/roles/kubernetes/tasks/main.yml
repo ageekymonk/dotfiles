@@ -8,8 +8,12 @@
   loop:
     - kubectl
     - kubectx
+    - kustomize
+    - helm
+    - argocd-cli
 
 - aur: name=lens-bin
 - aur: name=origin-client
 - aur: name=k9s
 - aur: name=krew-bin
+- aur: name=trivy

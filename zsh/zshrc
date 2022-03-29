@@ -77,7 +77,6 @@ zinit light-mode lucid wait has"kubectl" for \
       atpull"%atclone" \
       run-atpull \
       zdharma/null
-
 # User configuration
 
 # Do not record duplicate in your history
@@ -108,6 +107,8 @@ fi
 # fzf
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+[ -f /usr/share/fzf/key-bindings.zsh ] && source /usr/share/fzf/key-bindings.zsh
+[ -f /usr/share/fzf/completion.zsh ] && source /usr/share/fzf/completion.zsh
 
 _fzf_compgen_path() {
   ag -g "" "$1"
@@ -187,3 +188,6 @@ complete -o nospace -o default -o bashdefault -F _python_argcomplete "az"
 fpath+=${ZDOTDIR:-~}/.zsh_functions
 
 eval "$(direnv hook zsh)"
+
+# This is for aws cli
+export PAGER=

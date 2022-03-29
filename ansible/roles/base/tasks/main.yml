@@ -1,13 +1,16 @@
-- aur: name=notion-app
-- aur: name=wavebox
-- aur: name=vpn-slice-git
 - aur: name=direnv
-- aur: name=remmina-plugin-rdesktop
 - aur: name=google-chrome
+- aur: name=notion-app
 - aur: name=peco
-- aur: name=fzf-git
-- aur: name=wavebox
+- aur: name=remmina-plugin-rdesktop
+- aur: name=vpn-slice-git
 - aur: name=zoxide-bin
+- aur: name=choose-rust-git
+- aur: name=git-delta
+- aur: name=go-yq
+- aur: name=python-autoflake
+- aur: name=wavebox
+- aur: name=tomate-gtk
 
 - name: Install base packages
   community.general.pacman:
@@ -17,19 +20,28 @@
   become_user: root
   become_method: sudo
   loop:
-    - openconnect
-    - dnsmasq
-    - networkmanager-openconnect
-    - rdesktop
-    - remmina
-    - python-poetry
-    - yubioath-desktop
     - ccid
     - cups
+    - dnsmasq
+    - fzf
+    - graphviz
     - hplip
     - httpie
+    - networkmanager-openconnect
+    - openconnect
     - python-pip
-    - graphviz
+    - python-poetry
+    - rdesktop
+    - remmina
+    - reflector
+    - rsync
+    - yubioath-desktop
+    - bat
+    - dog
+    - skim
+    - xclip
+    - gnu-netcat
+    - ttf-fira-code
 
 - name: Enable a cups
   ansible.builtin.systemd:

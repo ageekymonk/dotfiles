@@ -8,6 +8,9 @@ OS := $(shell uname -s)
 
 .PHONY: help zsh kubernetes
 
+ai: ## Deploy ansible playbook for ai
+	echo "Deploying zsh playbook"
+	ansible-playbook -i $(CONFIG_ROOT)/ansible/hosts $(CONFIG_ROOT)/ansible/dotfiles.yml --ask-become-pass --tags ai
 
 base: ## Deploy ansible playbook for base
 	echo "Deploying zsh playbook"

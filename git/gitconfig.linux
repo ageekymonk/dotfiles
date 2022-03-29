@@ -38,10 +38,10 @@
 
 
 [pager]
-  color = true
-  #log = diff-highlight | less
-  #show = diff-highlight | less
-  #diff = diff-highlight | less
+    diff = delta
+    log = delta
+    reflog = delta
+    show = delta
 
 
 [branch]
