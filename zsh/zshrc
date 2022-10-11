@@ -45,12 +45,10 @@ autoload -Uz _zinit
 (( ${+_comps} )) && _comps[zinit]=_zinit
 ### End of Zinit installer's chunk
 
-[[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh
 DEFAULT_USER=${USER}
 
 source $ZSH/oh-my-zsh.sh
 
-zinit ice depth=1; zinit light romkatv/powerlevel10k
 zinit snippet OMZ::plugins/git/git.plugin.zsh
 zinit snippet OMZ::plugins/oc/oc.plugin.zsh
 zinit snippet OMZ::plugins/docker/_docker
@@ -78,6 +76,8 @@ zinit light-mode lucid wait has"kubectl" for \
       run-atpull \
       zdharma/null
 # User configuration
+
+eval "$(starship init zsh)"
 
 # Do not record duplicate in your history
 export HISTCONTROL=ignoreboth:erasedups
@@ -189,5 +189,10 @@ fpath+=${ZDOTDIR:-~}/.zsh_functions
 
 eval "$(direnv hook zsh)"
 
+export REDO_HISTORY_PATH=~/.zsh_history
+source "$(redo alias-file)"
+source <(konf-go shellwrapper zsh)
+
+bindkey -s '^q' 'redo^M'
 # This is for aws cli
 export PAGER=

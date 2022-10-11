@@ -7,6 +7,9 @@ fi
 # Enable aliases to be sudo’ed
 alias sudo='sudo '
 
+# Clipboard
+alias cb='xclip -selection c'
+
 # IP addresses
 alias pubip="dig +short myip.opendns.com @resolver1.opendns.com"
 alias localip="sudo ifconfig | grep -Eo 'inet (addr:)?([0-9]*\\.){3}[0-9]*' | grep -Eo '([0-9]*\\.){3}[0-9]*' | grep -v '127.0.0.1'"
@@ -273,7 +276,7 @@ function delete-snapshots() {
 }
 
 function elbv2-target-group-register-ip() {
-    tg=$(elbv2-target-groups | peco | awk '{ print $1 }')
+    tg=$(elbv2s | elbv2-target-groups | peco | awk '{ print $1 }')
     instances | peco | instance-ip | awk '{ print $2 }' | xargs -I {} aws elbv2 register-targets --target-group-arn=${tg} --targets Id={}
 }
 
@@ -537,13 +540,15 @@ alias tapp="terraform apply"
 
 # system commands
 alias df="df -H"
-alias curl="gpg --batch -q -d ~/.authinfo.gpg | curl --netrc-file /dev/stdin"
+# alias curl="gpg --batch -q -d ~/.authinfo.gpg | curl --netrc-file /dev/stdin"
 
 # Changing Default programs
 if [[ "$(uname)" == "Darwin" ]]
 then
     alias wget=aria2c
     alias cat=ccat
+else
+    alias cat=bat
 fi
 
 # fasd
@@ -654,3 +659,6 @@ alias nixq="nix-env -qaP"
 alias nixupgrade="sudo -i sh -c 'nix-channel --update && nix-env -iA nixpkgs.nix && launchctl remove org.nixos.nix-daemon && launchctl load /Library/LaunchDaemons/org.nixos.nix-daemon.plist'"
 alias nixup="nix-env -u"
 alias nixcfg="nvim ~/.nixpkgs/darwin-configuration.nix"
+
+# zx
+alias dynamodb="zx ${ZSH_CONFIG_DIR}/../zx/dynamodb.mjs"

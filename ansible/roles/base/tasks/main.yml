@@ -11,6 +11,7 @@
 - aur: name=python-autoflake
 - aur: name=wavebox
 - aur: name=tomate-gtk
+- aur: name=nvim-packer-git
 
 - name: Install base packages
   community.general.pacman:
@@ -42,6 +43,7 @@
     - xclip
     - gnu-netcat
     - ttf-fira-code
+    - starship
 
 - name: Enable a cups
   ansible.builtin.systemd:
