@@ -1,3 +1,4 @@
 tap "homebrew/bundle"
 brew "k9s"
+cask "google-chrome"
 cask "visual-studio-code"
