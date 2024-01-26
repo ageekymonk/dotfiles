@@ -60,12 +60,12 @@ azure:: ## Configure azure
 
 brew:: ## Configure brew Settings
 	@echo "Installing brew"
-	/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+	curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh
 	echo 'PATH=$PATH:/opt/homebrew/bin/' >> ~/.bashrc
 	source ~/.bashrc
 	@echo "Installing all sw via brew"
-	# @brew tap homebrew/bundle
-	# @brew bundle --file=brew/Brewfile
+	@brew tap homebrew/bundle
+	@brew bundle --file=brew/Brewfile
 
 linux:: ## Configure Linux Settings
 	@sudo apt install -y build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev python-pip tmux unzip
