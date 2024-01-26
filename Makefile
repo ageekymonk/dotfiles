@@ -64,8 +64,8 @@ ifeq ("$(wildcard /usr/local/bin/brew)","")
 	/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 endif
 	@echo "Installing all sw via brew"
-	@brew tap homebrew/bundle
-	@brew bundle --file=brew/Brewfile
+	# @brew tap homebrew/bundle
+	# @brew bundle --file=brew/Brewfile
 
 linux:: ## Configure Linux Settings
 	@sudo apt install -y build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev python-pip tmux unzip
