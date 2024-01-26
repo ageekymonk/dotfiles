@@ -64,7 +64,6 @@ brew:: ## Configure brew Settings
 	echo 'PATH=$PATH:/opt/homebrew/bin/' >> ~/.bashrc
 	source ~/.bashrc
 	@echo "Installing all sw via brew"
-	@brew tap homebrew/bundle
 	@brew bundle --file=brew/Brewfile
 
 linux:: ## Configure Linux Settings
