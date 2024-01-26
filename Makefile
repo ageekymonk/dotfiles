@@ -61,7 +61,8 @@ azure:: ## Configure azure
 brew:: ## Configure brew Settings
 	@echo "Installing brew"
 	/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-	(echo; echo 'eval "$(/opt/homebrew/bin/brew shellenv)"') >> ~/.zprofile
+	echo 'PATH=$PATH:/opt/homebrew/bin/' >> ~/.bashrc
+	source ~/.bashrc
 	@echo "Installing all sw via brew"
 	# @brew tap homebrew/bundle
 	# @brew bundle --file=brew/Brewfile
