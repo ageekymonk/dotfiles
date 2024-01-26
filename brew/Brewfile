@@ -1,2 +1,3 @@
-install k9s
-cask visual-studio-code
+tap "homebrew/bundle"
+brew "k9s"
+cask "visual-studio-code"
