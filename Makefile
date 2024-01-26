@@ -61,8 +61,7 @@ azure:: ## Configure azure
 brew:: ## Configure brew Settings
 ifeq ("$(wildcard /usr/local/bin/brew)","")
 	@echo "Installing brew"
-	@curl -fsSL -o /tmp/install https://raw.githubusercontent.com/Homebrew/install/master/install
-	@/usr/bin/ruby /tmp/install
+	/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 endif
 	@echo "Installing all sw via brew"
 	@brew tap homebrew/bundle
