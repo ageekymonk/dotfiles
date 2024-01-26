@@ -24,9 +24,8 @@ endif
 setup-mac:: ## Setup mac
 	@cd $(CONFIG_ROOT)
 ifeq ($(OS),Darwin)
-	@make osx
 	@make brew
-	@make hammerspoon
+	@make osx
 endif
 
 setup-linux:: ## Setup Linux
