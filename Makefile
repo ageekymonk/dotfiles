@@ -59,10 +59,8 @@ azure:: ## Configure azure
 	@sudo apt-get install -y apt-transport-https && sudo apt-get update && sudo apt-get install azure-cli
 
 brew:: ## Configure brew Settings
-ifeq ("$(wildcard /usr/local/bin/brew)","")
 	@echo "Installing brew"
 	/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-endif
 	@echo "Installing all sw via brew"
 	# @brew tap homebrew/bundle
 	# @brew bundle --file=brew/Brewfile
