@@ -78,23 +78,6 @@ linux:: ## Configure Linux Settings
 	@rm -Rf 1.0.1.zip
 	@sudo mv fasd-1.0.1/fasd /usr/local/bin/fasd
 
-emacs-setup:: ## Configure emacs for fresh laptop
-	@echo "Setting up emacs"
-ifeq ($(OS),Linux)
-	@sudo apt install -y emacs
-endif
-ifneq ("$(wildcard $(HOME)/.emacs.d)","")
-	@echo "Backing up existing emacs configs"
-	@mv $(HOME)/.emacs.d $(HOME)/.emacs.d_bkup
-endif
-	@echo "Installing spacemacs"
-	@git clone -b develop https://github.com/syl20bnr/spacemacs ~/.emacs.d
-
-emacs:: ## Configure emacs Settings
-	@ln $(LN_FLAGS) $(CONFIG_ROOT)/emacs/spacemacs ${HOME}/.spacemacs
-	@ln $(LN_FLAGS) $(CONFIG_ROOT)/emacs/layers/org-trello ${HOME}/.emacs.d/private/org-trello
-	@echo emacs configuration completed
-
 gcloud:: ## Install gcloud
 	@echo "Installing google cloud sdk"
 	@curl https://sdk.cloud.google.com | bash
