@@ -1,7 +1,6 @@
 tap "aylei/tap"
 tap "azure/functions"
 tap "derailed/k9s
-brew "cask"
 brew "docker", link: false
 brew "fasd"
 brew "hub"
