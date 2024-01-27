@@ -6,7 +6,6 @@ then
 fi
 
 export GOPATH="$HOME/projects/sw/gospace"
-export PYENV_ROOT="$HOME/.pyenv"
 export PATH="$GOPATH/bin:$PYENV_ROOT/bin:$PATH"
 
 # Set the path
@@ -16,7 +15,6 @@ export KEYID=0xA2F44E199F6956A2
 export GPG_TTY="$(tty)"
 export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
 
-export PATH="$PATH:$HOME/.rvm/bin" # Add RVM to PATH for scripting
 export PATH="/usr/local/bin:$PATH"
 export SHELL="zsh"
 export EDITOR="vim"
