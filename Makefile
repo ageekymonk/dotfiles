@@ -41,7 +41,6 @@ setup:: setup-common setup-mac ## Configure the laptop for fresh installation
 
 	@make git
 	@make ssh-setup
-	@make python-setup
 	@make zsh
 
 	@echo "Remember to import your gpg keys"
@@ -156,17 +155,6 @@ node-setup:: ## Setting up node in a fresh laptop
 osx:: ## Configure osx settings
 	@bash scripts/osx-setup.sh
 	@echo "osx configuration is completed"
-
-python-setup:: ##Setting up python in a fresh laptop
-ifeq ($(OS),Linux)
-ifeq ("$(wildcard $(HOME)/.pyenv)","")
-	git clone https://github.com/pyenv/pyenv.git ~/.pyenv
-endif
-endif
-	@echo "Configuring python"
-	@pyenv install 3.6.3
-	@pyenv global 3.6.3
-	@pip install awscli Pygments
 
 ssh-setup:: ## Setting up ssh for the first time
 	@echo "Setting up ssh"
