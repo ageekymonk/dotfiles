@@ -1,4 +1,6 @@
 tap "homebrew/bundle"
+brew "autojump"
+brew "fzf"
 brew "k9s"
 cask "google-chrome"
 cask "iterm2"
