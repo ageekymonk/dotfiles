@@ -1,7 +1,7 @@
 tap "homebrew/bundle"
-brew "iterm2"
 brew "k9s"
 cask "google-chrome"
+cask "iterm2"
 cask "notion"
 cask "visual-studio-code"
 cask "wavebox"
