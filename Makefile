@@ -45,7 +45,6 @@ setup:: setup-common setup-mac ## Configure the laptop for fresh installation
 
 	@echo "Remember to import your gpg keys"
 	@echo "Updated the Alfred license manually"
-	@echo "Install docker for mac manually"
 
 azure:: ## Configure azure
 	@echo "Installing Azure cli"
@@ -115,42 +114,6 @@ karabiner:: ## Install karabiner configs
 	@ln $(LN_FLAGS) $(CONFIG_ROOT)/karabiner/private.xml "${HOME}/Library/Application Support/Karabiner/private.xml"
 	@echo "karabiner configuration completed. Add https://github.com/Vonng/Capslock"
 
-nix:: ## Install nix pkg mgr
-	@echo "Installing nix"
-	@curl -fsSL -o /tmp/nix.sh https://nixos.org/nix/install
-	@bash /tmp/nix.sh --no-daemon
-	@rm -Rf /tmp/nix.sh
-	@source ${HOME}/.nix-profile/etc/profile.d/nix.sh
-ifeq ($(OS),Linux)
-	@mkdir -p ${HOME}/.config/nixpkgs
-	@ln $(LN_FLAGS) $(CONFIG_ROOT)/nix/home.nix.linux ${HOME}/.config/nixpkgs/home.nix
-	@echo "export SHELL=zsh" >> ~/.bashrc
-	@echo "export EDITOR=vim" >> ~/.bashrc
-	@source ${HOME}/.bashrc
-	@nix-channel --add https://github.com/rycee/home-manager/archive/release-20.03.tar.gz home-manager
-	@nix-channel --update
-	@nix-shell '<home-manager>' -A install
-	@home-manager switch
-endif
-ifeq ($(OS),Darwin)
-	@mkdir -p ${HOME}/.config/nixpkgs
-	@ln $(LN_FLAGS) $(CONFIG_ROOT)/nix/darwin-configuration.nix ${HOME}/.nixpkgs/darwin-configuration.nix
-	@ln $(LN_FLAGS) $(CONFIG_ROOT)/nix/home.nix ${HOME}/.config/nixpkgs/home.nix
-	@nix-build https://github.com/LnL7/nix-darwin/archive/master.tar.gz -A installer
-	@./result/bin/darwin-installer
-	@find /nix/store -name "*-set-environment" -exec echo ". {}" \; >> ${CONFIG_ROOT}/zsh/zshrc
-	@echo "export SHELL=zsh" >> ${CONFIG_ROOT}/zsh/zshrc
-	@echo "export EDITOR=vim" >> ${CONFIG_ROOT}/zsh/zshrc
-	@source ${HOME}/.zshrc
-	@nix-channel --add https://github.com/rycee/home-manager/archive/release-20.03.tar.gz home-manager
-	@nix-channel --update
-	@nix-shell '<home-manager>' -A install
-	@source ${HOME}/.zshrc
-	@home-manager switch
-endif
-
-node-setup:: ## Setting up node in a fresh laptop
-	@echo "Configuring node"
 
 osx:: ## Configure osx settings
 	@bash scripts/osx-setup.sh
@@ -180,11 +143,6 @@ tmux-setup:: ## Setting up tmux for th first time
 	@mkdir -p ${HOME}/.tmux/plugins
 	@git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 	@echo "tmux configuration completed"
-
-nvm-setup:: ## nvm setup
-	@echo "Setting up nvm"
-	@mkdir -p ${HOME}/.nvm
-	@npm install -g tern js-beautify eslint
 
 zsh:: ## Configure zsh Settings
 	@sh -c "$(curl -fsSL https://raw.githubusercontent.com/zdharma/zinit/master/doc/install.sh)"
