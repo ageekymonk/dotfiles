@@ -118,13 +118,6 @@ _fzf_compgen_path() {
   ag -g "" "$1"
 }
 
-# nvm
-export NVM_DIR=~/.nvm
-if [[ "$(uname)" == "Darwin" ]]
-then
-    source $(brew --prefix nvm)/nvm.sh --no-use
-fi
-
 # Start gpg-agent
 gpgconf --launch gpg-agent
 
