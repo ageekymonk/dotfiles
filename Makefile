@@ -41,14 +41,10 @@ setup:: setup-common setup-mac ## Configure the laptop for fresh installation
 
 	@make git
 	@make ssh-setup
-	@make emacs-setup
-	@make emacs
 	@make python-setup
-	@make tmux-setup
 	@make zsh
 
 	@echo "Remember to import your gpg keys"
-	@echo "Install Intellij Idea"
 	@echo "Updated the Alfred license manually"
 	@echo "Install docker for mac manually"
 
@@ -61,7 +57,7 @@ azure:: ## Configure azure
 brew:: ## Configure brew Settings
 	@echo "Installing brew"
 	curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh
-	echo 'PATH=$PATH:/opt/homebrew/bin/' >> ~/.bashrc
+	echo 'PATH=$$PATH:/opt/homebrew/bin/' >> ~/.bashrc
 	source ~/.bashrc
 	@echo "Installing all sw via brew"
 	@brew bundle --file=brew/Brewfile
@@ -107,19 +103,6 @@ ifeq ($(OS),Linux)
 endif
 	@go get -u github.com/alecthomas/gometalinter
 	@go get golang.org/x/tools/gopls
-
-hammerspoon:: ## Configure hammerspoon
-	@echo "Setting up Hammerspoon"
-	@mkdir -p hammerspoon/Spoons
-	@wget -O hammerspoon/Spoons/Ki.zip https://github.com/andweeb/ki/releases/download/v1.6.3/Ki.spoon.zip
-	@unzip hammerspoon/Spoons/Ki.zip -d hammerspoon/Spoons/
-	@wget -O hammerspoon/Spoons/miro.zip https://github.com/miromannino/miro-windows-manager/archive/1.1.zip
-	@unzip hammerspoon/Spoons/miro.zip -d hammerspoon/Spoons/
-	@mv hammerspoon/Spoons/miro-windows-manager-1.1/MiroWindowsManager.spoon hammerspoon/Spoons/
-	@rm -Rf hammerspoon/Spoons/miro-windows-manager-1.1
-	@wget -O hammerspoon/undocumented.tar.gz https://github.com/asmagill/hammerspoon_asm.undocumented/releases/download/v0.1/undocumented-v0.1.tar.gz
-	@cd hammerspoon && tar -xzvf undocumented.tar.gz && cd ..
-	@ln $(LN_FLAGS) $(CONFIG_ROOT)/hammerspoon ${HOME}/.hammerspoon
 
 iterm:: ## Configure iterm
 	@echo "setting up iterm"
@@ -184,15 +167,6 @@ endif
 	@pyenv install 3.6.3
 	@pyenv global 3.6.3
 	@pip install awscli Pygments
-
-ruby-setup:: ## Setting up ruby in a fresh laptop
-	@echo "Configuring ruby"
-	@echo "Installing RVM"
-	@curl -sSL -o install_ruby.sh https://get.rvm.io
-	@bash install_ruby.sh
-	@source $(HOME)/.rvm/scripts/rvm
-	@rvm install 2.4
-	@rvm use 2.4 --default
 
 ssh-setup:: ## Setting up ssh for the first time
 	@echo "Setting up ssh"
