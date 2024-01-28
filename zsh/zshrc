@@ -82,7 +82,7 @@ zinit light-mode lucid wait has"kubectl" for \
       atclone"kubectl completion zsh > _kubectl" \
       atpull"%atclone" \
       run-atpull \
-      zdharma/null
+      zdharma-continuum/null
 
 # User configuration
 
@@ -129,10 +129,9 @@ export PATH="$PATH:$HOME/.bash-my-aws/bin"
 source ~/.bash-my-aws/aliases
 source ~/.bash-my-aws/bash_completion.sh
 
-source $ZSH_CUSTOM/zshalias
+zshsource $ZSH_CUSTOM/zshalias
 
 # Enable Ctrl-x-e to edit command line
-fpath=(~/.oh-my-zsh/custom/plugins/oc $fpath)
 autoload -U +X compinit && compinit
 autoload -U +X bashcompinit && bashcompinit
 
