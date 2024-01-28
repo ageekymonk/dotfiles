@@ -129,7 +129,7 @@ export PATH="$PATH:$HOME/.bash-my-aws/bin"
 source ~/.bash-my-aws/aliases
 source ~/.bash-my-aws/bash_completion.sh
 
-zshsource $ZSH_CUSTOM/zshalias
+source $ZSH_CUSTOM/zshalias
 
 # Enable Ctrl-x-e to edit command line
 autoload -U +X compinit && compinit
