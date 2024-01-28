@@ -51,9 +51,10 @@ DEFAULT_USER=${USER}
 
 source $ZSH/oh-my-zsh.sh
 
+zstyle ':completion:*:*:docker:*' option-stacking yes
+zstyle ':completion:*:*:docker-*:*' option-stacking yes
+
 zinit snippet OMZ::plugins/git/git.plugin.zsh
-zinit snippet OMZ::plugins/oc/oc.plugin.zsh
-zinit snippet OMZ::plugins/docker/_docker
 
 zinit snippet https://raw.githubusercontent.com/ageekymonk/kubectl-aliases/master/.kubectl_aliases
 zinit snippet https://iterm2.com/shell_integration/zsh
