@@ -1,5 +1,6 @@
 tap "homebrew/bundle"
 brew "autojump"
+brew "coreutils"
 brew "fzf"
 brew "k9s"
 brew "powerlevel10k"
