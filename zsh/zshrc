@@ -69,10 +69,6 @@ zinit as"program" make'!' atclone'./direnv hook zsh > zhook.zsh' \
       atpull'%atclone' pick"direnv" src"zhook.zsh" for \
       direnv/direnv
 
-zinit as"program" atclone'fasd --init auto > fasd.zsh' \
-      atpull'%atclone' pick"fasd" src"fasd.zsh" nocompile'!' for \
-      clvv/fasd
-
 zinit wait lucid for \
       hlissner/zsh-autopair
 
