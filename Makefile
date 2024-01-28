@@ -152,7 +152,7 @@ zsh:: ## Configure zsh Settings
 	@ln $(LN_FLAGS) $(CONFIG_ROOT)/zsh/p10k.zsh ${HOME}/.p10k.zsh
 	@mkdir -p $(HOME)/.aws/cli
 	@ln $(LN_FLAGS) $(CONFIG_ROOT)/aws/alias ${HOME}/.aws/cli/alias
-	@git clone https://github.com/bash-my-aws/bash-my-aws.git
+	@git clone https://github.com/bash-my-aws/bash-my-aws.git ${HOME}/.bash-my-aws
 
 ifeq ($(OS),Linux)
 	@sudo apt install -y zsh
