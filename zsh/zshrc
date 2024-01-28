@@ -126,10 +126,14 @@ source ~/.bash-my-aws/aliases
 source ~/.bash-my-aws/bash_completion.sh
 
 source $ZSH_CUSTOM/zshalias
+export PATH="$PATH:${BMA_HOME:-$HOME/.bash-my-aws}/bin"
+source ${BMA_HOME:-$HOME/.bash-my-aws}/aliases
 
 # Enable Ctrl-x-e to edit command line
 autoload -U +X compinit && compinit
 autoload -U +X bashcompinit && bashcompinit
+
+source ${BMA_HOME:-$HOME/.bash-my-aws}/bash_completion.sh
 
 # Emacs style
 autoload -U edit-command-line
