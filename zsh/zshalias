@@ -564,8 +564,8 @@ then
     alias cat=ccat
 fi
 
-# fasd
-alias j='fasd_cd -d'
+# autojump
+alias j='autojump'
 
 # exa
 alias ls='exa'
@@ -616,8 +616,6 @@ zle -N accept-line my-accept-line
 # rebind Enter, usually this is `^M'
 bindkey '^M' accept-line
 
-alias getmp3="youtube-dl -x --audio-format mp3 "
-
 # fkill - kill processes - list only the ones you can kill. Modified the earlier script.
 fkill() {
     local pid
@@ -659,16 +657,3 @@ fzf-cd-widget() {
 }
 zle     -N    fzf-cd-widget
 bindkey '\ec' fzf-cd-widget
-
-# Weather
-weather() {
-  curl http://v2.wttr.in/Toongabbie
-}
-
-# nix
-alias nixre="darwin-rebuild switch"
-alias nixgc="nix-collect-garbage -d"
-alias nixq="nix-env -qaP"
-alias nixupgrade="sudo -i sh -c 'nix-channel --update && nix-env -iA nixpkgs.nix && launchctl remove org.nixos.nix-daemon && launchctl load /Library/LaunchDaemons/org.nixos.nix-daemon.plist'"
-alias nixup="nix-env -u"
-alias nixcfg="nvim ~/.nixpkgs/darwin-configuration.nix"
