@@ -567,8 +567,8 @@ fi
 # autojump
 alias j='autojump'
 
-# exa
-alias ls='exa'
+# eza
+alias ls='eza'
 
 # find
 alias find='fd'
