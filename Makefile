@@ -59,6 +59,7 @@ brew:: ## Configure brew Settings
 	source ~/.bashrc
 	@echo "Installing all sw via brew"
 	@brew bundle --file=brew/Brewfile
+	mas install 1475387142
 
 linux:: ## Configure Linux Settings
 	@sudo apt install -y build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev python-pip tmux unzip
