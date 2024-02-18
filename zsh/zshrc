@@ -179,3 +179,5 @@ _python_argcomplete() {
 }
 complete -o nospace -o default -o bashdefault -F _python_argcomplete "az"
 fpath+=${ZDOTDIR:-~}/.zsh_functions
+
+export AWS_VAULT_BACKEND=keychain
