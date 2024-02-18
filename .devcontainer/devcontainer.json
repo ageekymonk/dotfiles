@@ -1,0 +1,45 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/universal
+{
+  "name": "Default Linux Universal",
+  // Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
+  "image": "mcr.microsoft.com/devcontainers/universal:2-linux",
+  "runArgs": ["--device=/dev/net/tun"],
+  "features": {
+    "ghcr.io/devcontainers/features/aws-cli:1": {},
+    "ghcr.io/devcontainers/features/azure-cli:1": {},
+    "ghcr.io/tailscale/codespace/tailscale": {},
+    "ghcr.io/devcontainers-contrib/features/argo-cd:1": {},
+    "ghcr.io/devcontainers-contrib/features/asdf-package:1": {},
+    "ghcr.io/devcontainers-contrib/features/cosign:1": {},
+    "ghcr.io/devcontainers-contrib/features/direnv-asdf:2": {},
+    "ghcr.io/devcontainers-contrib/features/fd:1": {},
+    "ghcr.io/devcontainers-contrib/features/fzf:1": {},
+    "ghcr.io/devcontainers-contrib/features/k6:1": {},
+    "ghcr.io/devcontainers-contrib/features/kubectl-asdf:2": {},
+    "ghcr.io/devcontainers-contrib/features/packer-asdf:2": {},
+    "ghcr.io/devcontainers-contrib/features/pass-apt-get:1": {},
+    "ghcr.io/devcontainers-contrib/features/peco-asdf:2": {},
+    "ghcr.io/devcontainers-contrib/features/powershell:1": {},
+    "ghcr.io/devcontainers-contrib/features/terraform-asdf:2": {},
+    "ghcr.io/devcontainers-contrib/features/tmux-apt-get:1": {},
+    "ghcr.io/rchaganti/vsc-devcontainer-features/azurebicep:1": {},
+    "ghcr.io/audacioustux/devcontainers/common-utils-extras:1": {},
+    "ghcr.io/audacioustux/devcontainers/k9s:1": {}
+  }
+
+  // Features to add to the dev container. More info: https://containers.dev/features.
+  // "features": {},
+
+  // Use 'forwardPorts' to make a list of ports inside the container available locally.
+  // "forwardPorts": [],
+
+  // Use 'postCreateCommand' to run commands after the container is created.
+  // "postCreateCommand": "uname -a",
+
+  // Configure tool-specific properties.
+  // "customizations": {},
+
+  // Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
+  // "remoteUser": "root"
+}
