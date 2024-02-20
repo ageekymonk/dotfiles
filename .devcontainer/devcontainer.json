@@ -9,21 +9,6 @@
     "ghcr.io/devcontainers/features/aws-cli:1": {},
     "ghcr.io/devcontainers/features/azure-cli:1": {},
     "ghcr.io/tailscale/codespace/tailscale": {},
-    "ghcr.io/devcontainers-contrib/features/argo-cd:1": {},
-    "ghcr.io/devcontainers-contrib/features/asdf-package:1": {},
-    "ghcr.io/devcontainers-contrib/features/cosign:1": {},
-    "ghcr.io/devcontainers-contrib/features/direnv-asdf:2": {},
-    "ghcr.io/devcontainers-contrib/features/fd:1": {},
-    "ghcr.io/devcontainers-contrib/features/fzf:1": {},
-    "ghcr.io/devcontainers-contrib/features/k6:1": {},
-    "ghcr.io/devcontainers-contrib/features/kubectl-asdf:2": {},
-    "ghcr.io/devcontainers-contrib/features/packer-asdf:2": {},
-    "ghcr.io/devcontainers-contrib/features/pass-apt-get:1": {},
-    "ghcr.io/devcontainers-contrib/features/peco-asdf:2": {},
-    "ghcr.io/devcontainers-contrib/features/powershell:1": {},
-    "ghcr.io/devcontainers-contrib/features/terraform-asdf:2": {},
-    "ghcr.io/devcontainers-contrib/features/tmux-apt-get:1": {},
-    "ghcr.io/rchaganti/vsc-devcontainer-features/azurebicep:1": {},
     "ghcr.io/audacioustux/devcontainers/k9s:1": {}
   }
 
