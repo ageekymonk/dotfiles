@@ -1,6 +1,5 @@
 [user]
   useConfigOnly = true
-  signingkey = A2F44E199F6956A2
 
 [core]
   excludesfile = ~/.gitignore
@@ -16,7 +15,7 @@
   cookiefile = ~/.gitcookies
 
 [commit]
-  gpgsign = false
+  gpgsign = true
 
 [gpg]
   format = ssh
