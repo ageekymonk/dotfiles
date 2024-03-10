@@ -24,10 +24,10 @@
   path = alias.gitconfig
 
 [includeIf "gitdir:~/projects/sw/repos/personal/"]
-    path = gitconfig-personal
+    path = ~/.git/gitconfig-personal
 
 [includeIf "gitdir:~/projects/sw/repos/techniumlabs/"]
-    path = gitconfig-techniumlabs
+    path = ~/.git/gitconfig-techniumlabs
 
 
 [advice]
