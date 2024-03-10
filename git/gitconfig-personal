@@ -1,3 +1,4 @@
 [user]
     email = ramzthecoder@gmail.com
     name = ageekymonk
+    signingKey ~/.ssh/id_ed25519_github.pub

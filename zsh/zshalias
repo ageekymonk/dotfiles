@@ -24,6 +24,7 @@ alias mergepdf='/System/Library/Automator/Combine\ PDF\ Pages.action/Contents/Re
 
 # git aliases
 alias gitcontributors='git log --format="%aN" | sort -u'
+alias gp='git push --force-with-lease'
 
 # Emacs Aliases
 function vterm_printf(){

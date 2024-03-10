@@ -18,6 +18,9 @@
 [commit]
   gpgsign = false
 
+[gpg]
+  format = ssh
+
 [include]
   path = alias.gitconfig
 
@@ -45,11 +48,10 @@
 
 [branch]
   autosetupmerge = true
-
+	sort = -committerdate
 
 [color]
   ui = auto
-
 
 [color "branch"]
   current = yellow reverse
@@ -87,8 +89,8 @@
 
 
 [rerere]
-  enabled = 1
-
+	enabled = true
+  autoUpdate = true
 
 [difftool "vscode"]
   cmd = code --wait --diff $LOCAL $REMOTE
