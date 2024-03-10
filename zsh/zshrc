@@ -33,14 +33,14 @@ HIST_STAMPS="mm/dd/yyyy"
 
 
 ### Added by Zinit's installer
-if [[ ! -f $HOME/.zinit/bin/zinit.zsh ]]; then
+if [[ ! -f $HOME/.zinit/bin/zi.zsh ]]; then
     print -P "%F{33}▓▒░ %F{220}Installing DHARMA Initiative Plugin Manager (zdharma/zinit)…%f"
     command mkdir -p "$HOME/.zinit" && command chmod g-rwX "$HOME/.zinit"
     command git clone https://github.com/zdharma/zinit "$HOME/.zinit/bin" && \
         print -P "%F{33}▓▒░ %F{34}Installation successful.%f" || \
         print -P "%F{160}▓▒░ The clone has failed.%f"
 fi
-source "$HOME/.zinit/bin/zinit.zsh"
+source "$HOME/.zinit/bin/zi.zsh"
 autoload -Uz _zinit
 (( ${+_comps} )) && _comps[zinit]=_zinit
 ### End of Zinit installer's chunk
@@ -49,8 +49,12 @@ DEFAULT_USER=${USER}
 
 source $ZSH/oh-my-zsh.sh
 
+zstyle ':completion:*:*:docker:*' option-stacking yes
+zstyle ':completion:*:*:docker-*:*' option-stacking yes
+
 zinit snippet OMZ::plugins/git/git.plugin.zsh
 zinit snippet OMZ::plugins/docker/_docker
+
 
 zinit snippet https://raw.githubusercontent.com/ageekymonk/kubectl-aliases/master/.kubectl_aliases
 
@@ -64,6 +68,11 @@ zinit as"program" atclone'fasd --init auto > fasd.zsh' \
       atpull'%atclone' pick"fasd" src"fasd.zsh" nocompile'!' for \
       clvv/fasd
 
+zinit as"program" make'!' atclone'./direnv hook zsh > zhook.zsh' \
+      atpull'%atclone' pick"direnv" src"zhook.zsh" for \
+      direnv/direnv
+
+
 zinit wait lucid for \
       hlissner/zsh-autopair
 
@@ -73,7 +82,8 @@ zinit light-mode lucid wait has"kubectl" for \
       atclone"kubectl completion zsh > _kubectl" \
       atpull"%atclone" \
       run-atpull \
-      zdharma/null
+      zdharma-continuum/null
+
 # User configuration
 
 eval "$(starship init zsh)"
@@ -113,13 +123,6 @@ _fzf_compgen_path() {
   ag -g "" "$1"
 }
 
-# nvm
-export NVM_DIR=~/.nvm
-if [[ "$(uname)" == "Darwin" ]]
-then
-    source $(brew --prefix nvm)/nvm.sh --no-use
-fi
-
 # Start gpg-agent
 gpgconf --launch gpg-agent
 
@@ -131,12 +134,17 @@ source ~/.bash-my-aws/aliases
 source ~/.bash-my-aws/bash_completion.sh
 
 source $ZSH_CUSTOM/zshalias
+export PATH="$PATH:${BMA_HOME:-$HOME/.bash-my-aws}/bin"
+source ${BMA_HOME:-$HOME/.bash-my-aws}/aliases
 
 . $HOME/.asdf/asdf.sh
 fpath=(${ASDF_DIR}/completions $fpath)
 
+# Enable Ctrl-x-e to edit command line
 autoload -U +X compinit && compinit
 autoload -U +X bashcompinit && bashcompinit
+
+source ${BMA_HOME:-$HOME/.bash-my-aws}/bash_completion.sh
 
 # Emacs style
 autoload -U edit-command-line
@@ -182,6 +190,7 @@ _python_argcomplete() {
 complete -o nospace -o default -o bashdefault -F _python_argcomplete "az"
 fpath+=${ZDOTDIR:-~}/.zsh_functions
 
+
 eval "$(direnv hook zsh)"
 
 export REDO_HISTORY_PATH=~/.zsh_history
@@ -199,3 +208,4 @@ export AWS_VAULT_BACKEND=pass
 # bun
 export BUN_INSTALL="$HOME/.local/share/reflex/bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
+export AWS_VAULT_BACKEND=keychain
