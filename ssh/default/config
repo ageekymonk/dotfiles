@@ -5,8 +5,6 @@ ControlMaster auto
 ControlPath ~/.ssh/%r@%h:%p
 ServerAliveCountMax=30
 ServerAliveInterval=5
-PubKeyAcceptedKeyTypes=ssh-rsa
-PubKeyAcceptedKeyTypes=+ssh-dss
 
 # Personal Hosts
 Host github.com
