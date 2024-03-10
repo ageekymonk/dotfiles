@@ -22,6 +22,7 @@ zsh/plugins
 zsh/themes
 
 spacemacs.env
+git/gitconfig
 git/gitconfig-*
 
 **/node_modules/*
