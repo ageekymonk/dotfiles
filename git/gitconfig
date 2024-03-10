@@ -90,14 +90,14 @@
   enabled = 1
 
 
-[difftool "Kaleidoscope"]
-  cmd = ksdiff --partial-changeset --relative-path \"$MERGED\" -- \"$LOCAL\" \"$REMOTE\"
+[difftool "vscode"]
+  cmd = code --wait --diff $LOCAL $REMOTE
 
 
 [diff]
   renames = copies
   mnemonicprefix = true
-  tool = Kaleidoscope
+  tool = vscode
   algorithm = histogram
   compactionHeuristic = true
 
@@ -106,15 +106,14 @@
   prompt = false
 
 
-[mergetool "Kaleidoscope"]
-  cmd = ksdiff --merge --output \"$MERGED\" --base \"$BASE\" -- \"$LOCAL\" --snapshot \"$REMOTE\" --snapshot
+[mergetool "vscode"]
+  cmd = code --wait $MERGED
   trustExitCode = true
 
 
 [merge]
   stat = true
-  diff = vimdiff
-  tool = Kaleidoscope
+  tool = vscode
 
 
 [mergetool]
