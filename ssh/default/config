@@ -11,7 +11,7 @@ PubKeyAcceptedKeyTypes=+ssh-dss
 # Personal Hosts
 Host github.com
     IdentitiesOnly yes
-    IdentityFile ~/.ssh/~/.ssh/id_ed25519_github
+    IdentityFile ~/.ssh/id_ed25519_github
 
 Host ssh.dev.azure.com
     IdentitiesOnly yes
