@@ -5,7 +5,7 @@ fi
 
 
 # Enable aliases to be sudo’ed
-alias sudo='sudo '
+alias sudo='nocorrect sudo '
 
 # Clipboard
 alias cb='xclip -selection c'
@@ -555,7 +555,8 @@ fi
 alias j='fasd_cd -d'
 
 # exa
-alias ls='exa'
+alias ls='eza'
+alias l='eza --long --git'
 
 # find
 alias find='fd'

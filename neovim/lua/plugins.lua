@@ -67,6 +67,17 @@ return packer.startup(function(use)
 		config = [[require('config.nvim-tree')]],
 	})
 
+	vim.cmd([[ let g:neo_tree_remove_legacy_commands = 1 ]])
+
+	use({
+		"nvim-neo-tree/neo-tree.nvim",
+		branch = "v2.x",
+		requires = {
+			"nvim-lua/plenary.nvim",
+			"kyazdani42/nvim-web-devicons", -- not strictly required, but recommended
+			"MunifTanjim/nui.nvim",
+		},
+	})
 	-- Super fast buffer jump
 	use({
 		"phaazon/hop.nvim",
@@ -118,15 +129,15 @@ return packer.startup(function(use)
 	-- comment
 	use({ "numToStr/Comment.nvim", config = [[require('config.comment')]] })
 
-	use({
-		"danymat/neogen",
-		config = function()
-			require("neogen").setup({})
-		end,
-		requires = "nvim-treesitter/nvim-treesitter",
-		-- Uncomment next line if you want to follow only stable versions
-		-- tag = "*"
-	})
+	-- use({
+	-- 	"danymat/neogen",
+	-- 	config = function()
+	-- 		require("neogen").setup({})
+	-- 	end,
+	-- 	requires = "nvim-treesitter/nvim-treesitter",
+	-- 	-- Uncomment next line if you want to follow only stable versions
+	-- 	-- tag = "*"
+	-- })
 
 	use({
 		"folke/todo-comments.nvim",
@@ -157,5 +168,7 @@ return packer.startup(function(use)
 	use("moll/vim-bbye")
 
 	--multi cursor
-	use("mg979/vim-visual-multi-cursor")
+	-- use("mg979/vim-visual-multi-cursor")
+
+	use("~/projects/sw/repos/personal/dotfiles/neovim/neocloud")
 end)

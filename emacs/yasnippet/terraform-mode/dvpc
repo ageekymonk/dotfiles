@@ -1,7 +1,0 @@
-# -*- mode: snippet -*-
-# name: dvpc
-# key: dvpc
-# --
-data "aws_vpc" cluster_vpc {
-id = "\${var.vpc}"
-}

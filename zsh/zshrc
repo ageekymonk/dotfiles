@@ -26,7 +26,7 @@ fi
 # Oh My ZSH Configuration
 CASE_SENSITIVE="true"
 UPDATE_ZSH_DAYS=15
-ENABLE_CORRECTION="true"
+ENABLE_CORRECTION="false"
 COMPLETION_WAITING_DOTS="true"
 DISABLE_UNTRACKED_FILES_DIRTY="true"
 HIST_STAMPS="mm/dd/yyyy"
@@ -50,7 +50,6 @@ DEFAULT_USER=${USER}
 source $ZSH/oh-my-zsh.sh
 
 zinit snippet OMZ::plugins/git/git.plugin.zsh
-zinit snippet OMZ::plugins/oc/oc.plugin.zsh
 zinit snippet OMZ::plugins/docker/_docker
 
 zinit snippet https://raw.githubusercontent.com/ageekymonk/kubectl-aliases/master/.kubectl_aliases
@@ -133,9 +132,6 @@ source ~/.bash-my-aws/bash_completion.sh
 
 source $ZSH_CUSTOM/zshalias
 
-# Enable Ctrl-x-e to edit command line
-fpath=(~/.oh-my-zsh/custom/plugins/oc $fpath)
-
 . $HOME/.asdf/asdf.sh
 fpath=(${ASDF_DIR}/completions $fpath)
 
@@ -148,7 +144,6 @@ zle -N edit-command-line
 bindkey '^xe' edit-command-line '^x^e' edit-command-line
 bindkey -M emacs '^P' history-substring-search-up
 bindkey -M emacs '^N' history-substring-search-down
-bindkey -s '^x^f' 'emacsclient -t $(fzf)\n'
 bindkey -s '^f^v' ' | peco | pbcopy\n'
 
 # Modules
@@ -196,3 +191,11 @@ source <(konf-go shellwrapper zsh)
 bindkey -s '^q' 'redo^M'
 # This is for aws cli
 export PAGER=
+
+export AWS_VAULT_BACKEND=pass
+# bun completions
+[ -s "/home/ramz/.local/share/reflex/bun/_bun" ] && source "/home/ramz/.local/share/reflex/bun/_bun"
+
+# bun
+export BUN_INSTALL="$HOME/.local/share/reflex/bun"
+export PATH="$BUN_INSTALL/bin:$PATH"

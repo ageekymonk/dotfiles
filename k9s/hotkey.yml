@@ -11,6 +11,14 @@ hotKey:
     shortCut:    Shift-2
     description: Viewing Contexts
     command:     contexts
+  shift-3:
+    shortCut:    Shift-3
+    description: Viewing cr
+    command:     cr
+  shift-4:
+    shortCut:    Shift-4
+    description: Viewing crb
+    command:     crb
   shift-5:
     shortCut:    Shift-5
     description: Viewing service account
@@ -19,7 +27,15 @@ hotKey:
     shortCut:    Shift-6
     description: Viewing deployments
     command:     deployments
+  shift-7:
+    shortCut:    Shift-7
+    description: Viewing daemonsets
+    command:     daemonsets
   shift-8:
     shortCut:    Shift-8
     description: Viewing secrets
     command:     secret
+  shift-9:
+    shortCut:    Shift-9
+    description: Viewing nodes
+    command:     nodes
