@@ -1,8 +1,0 @@
-# -*- mode: snippet -*-
-# name: droute53zone
-# key: dr53zone
-# --
-data "aws_route53_zone" public_zone {
-name         = "\${var.public_zone_name}"
-private_zone = false
-}

@@ -1,0 +1,55 @@
+- aur: name=direnv
+- aur: name=google-chrome
+- aur: name=notion-app
+- aur: name=peco
+- aur: name=remmina-plugin-rdesktop
+- aur: name=vpn-slice-git
+- aur: name=zoxide-bin
+- aur: name=choose-rust-git
+- aur: name=git-delta
+- aur: name=go-yq
+- aur: name=python-autoflake
+- aur: name=wavebox
+- aur: name=tomate-gtk
+- aur: name=nvim-packer-git
+
+- name: Install base packages
+  community.general.pacman:
+    name: "{{ item }}"
+    state: present
+  become: yes
+  become_user: root
+  become_method: sudo
+  loop:
+    - ccid
+    - cups
+    - dnsmasq
+    - fzf
+    - graphviz
+    - hplip
+    - httpie
+    - networkmanager-openconnect
+    - openconnect
+    - python-pip
+    - python-poetry
+    - rdesktop
+    - remmina
+    - reflector
+    - rsync
+    - yubioath-desktop
+    - bat
+    - dog
+    - skim
+    - xclip
+    - gnu-netcat
+    - ttf-fira-code
+    - starship
+
+- name: Enable a cups
+  ansible.builtin.systemd:
+    name: cups
+    state: started
+    enabled: yes
+  become: yes
+  become_user: root
+  become_method: sudo

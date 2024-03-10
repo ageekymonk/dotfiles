@@ -1,0 +1,27 @@
+- name: Install base packages
+  community.general.pacman:
+    name: "{{ item }}"
+    state: present
+  become: yes
+  become_user: root
+  become_method: sudo
+  loop:
+    - terraform
+    - aws-vault
+    - vault
+    - step-cli
+    - eksctl
+    - mkcert
+
+- name: Clone asdf repository
+  git:
+    repo: git@github.com:asdf-vm/asdf.git
+    dest: "~/.asdf"
+    version: v0.8.0
+
+- aur: name=aws-cli-v2-bin
+- aur: name=azure-cli
+- aur: name=usql
+- aur: name=saml2aws-bin
+- aur: name=aws-session-manager-plugin
+- aur: name=aws-sam-cli

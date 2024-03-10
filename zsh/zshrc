@@ -26,7 +26,7 @@ fi
 # Oh My ZSH Configuration
 CASE_SENSITIVE="true"
 UPDATE_ZSH_DAYS=15
-ENABLE_CORRECTION="true"
+ENABLE_CORRECTION="false"
 COMPLETION_WAITING_DOTS="true"
 DISABLE_UNTRACKED_FILES_DIRTY="true"
 HIST_STAMPS="mm/dd/yyyy"
@@ -45,8 +45,6 @@ autoload -Uz _zinit
 (( ${+_comps} )) && _comps[zinit]=_zinit
 ### End of Zinit installer's chunk
 
-ZSH_THEME="powerlevel10k/powerlevel10k"
-[[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh
 DEFAULT_USER=${USER}
 
 source $ZSH/oh-my-zsh.sh
@@ -55,9 +53,10 @@ zstyle ':completion:*:*:docker:*' option-stacking yes
 zstyle ':completion:*:*:docker-*:*' option-stacking yes
 
 zinit snippet OMZ::plugins/git/git.plugin.zsh
+zinit snippet OMZ::plugins/docker/_docker
+
 
 zinit snippet https://raw.githubusercontent.com/ageekymonk/kubectl-aliases/master/.kubectl_aliases
-zinit snippet https://iterm2.com/shell_integration/zsh
 
 zinit load zsh-users/zsh-autosuggestions
 zinit load zsh-users/zsh-history-substring-search
@@ -65,9 +64,14 @@ zinit load zsh-users/zsh-completions
 zinit load zsh-users/zsh-syntax-highlighting
 zinit load wfxr/forgit
 
+zinit as"program" atclone'fasd --init auto > fasd.zsh' \
+      atpull'%atclone' pick"fasd" src"fasd.zsh" nocompile'!' for \
+      clvv/fasd
+
 zinit as"program" make'!' atclone'./direnv hook zsh > zhook.zsh' \
       atpull'%atclone' pick"direnv" src"zhook.zsh" for \
       direnv/direnv
+
 
 zinit wait lucid for \
       hlissner/zsh-autopair
@@ -81,6 +85,8 @@ zinit light-mode lucid wait has"kubectl" for \
       zdharma-continuum/null
 
 # User configuration
+
+eval "$(starship init zsh)"
 
 # Do not record duplicate in your history
 export HISTCONTROL=ignoreboth:erasedups
@@ -110,6 +116,8 @@ fi
 # fzf
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+[ -f /usr/share/fzf/key-bindings.zsh ] && source /usr/share/fzf/key-bindings.zsh
+[ -f /usr/share/fzf/completion.zsh ] && source /usr/share/fzf/completion.zsh
 
 _fzf_compgen_path() {
   ag -g "" "$1"
@@ -129,6 +137,9 @@ source $ZSH_CUSTOM/zshalias
 export PATH="$PATH:${BMA_HOME:-$HOME/.bash-my-aws}/bin"
 source ${BMA_HOME:-$HOME/.bash-my-aws}/aliases
 
+. $HOME/.asdf/asdf.sh
+fpath=(${ASDF_DIR}/completions $fpath)
+
 # Enable Ctrl-x-e to edit command line
 autoload -U +X compinit && compinit
 autoload -U +X bashcompinit && bashcompinit
@@ -141,7 +152,6 @@ zle -N edit-command-line
 bindkey '^xe' edit-command-line '^x^e' edit-command-line
 bindkey -M emacs '^P' history-substring-search-up
 bindkey -M emacs '^N' history-substring-search-down
-bindkey -s '^x^f' 'emacsclient -t $(fzf)\n'
 bindkey -s '^f^v' ' | peco | pbcopy\n'
 
 # Modules
@@ -180,4 +190,22 @@ _python_argcomplete() {
 complete -o nospace -o default -o bashdefault -F _python_argcomplete "az"
 fpath+=${ZDOTDIR:-~}/.zsh_functions
 
+
+eval "$(direnv hook zsh)"
+
+export REDO_HISTORY_PATH=~/.zsh_history
+source "$(redo alias-file)"
+source <(konf-go shellwrapper zsh)
+
+bindkey -s '^q' 'redo^M'
+# This is for aws cli
+export PAGER=
+
+export AWS_VAULT_BACKEND=pass
+# bun completions
+[ -s "/home/ramz/.local/share/reflex/bun/_bun" ] && source "/home/ramz/.local/share/reflex/bun/_bun"
+
+# bun
+export BUN_INSTALL="$HOME/.local/share/reflex/bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
 export AWS_VAULT_BACKEND=keychain

@@ -5,7 +5,10 @@ fi
 
 
 # Enable aliases to be sudo’ed
-alias sudo='sudo '
+alias sudo='nocorrect sudo '
+
+# Clipboard
+alias cb='xclip -selection c'
 
 # IP addresses
 alias pubip="dig +short myip.opendns.com @resolver1.opendns.com"
@@ -18,6 +21,9 @@ alias flush="sudo killall -HUP mDNSResponder;sudo killall mDNSResponderHelper;su
 # Merge PDF files
 # Usage: `mergepdf -o output.pdf input{1,2,3}.pdf`
 alias mergepdf='/System/Library/Automator/Combine\ PDF\ Pages.action/Contents/Resources/join.py'
+
+# git aliases
+alias gitcontributors='git log --format="%aN" | sort -u'
 
 # Emacs Aliases
 function vterm_printf(){
@@ -84,7 +90,7 @@ bup() {
   fi
 }
 
-brp() {
+bcp() {
   local uninst=$(brew leaves | fzf -m)
 
   if [[ $uninst ]]; then
@@ -271,7 +277,7 @@ function delete-snapshots() {
 }
 
 function elbv2-target-group-register-ip() {
-    tg=$(elbv2-target-groups | peco | awk '{ print $1 }')
+    tg=$(elbv2s | elbv2-target-groups | peco | awk '{ print $1 }')
     instances | peco | instance-ip | awk '{ print $2 }' | xargs -I {} aws elbv2 register-targets --target-group-arn=${tg} --targets Id={}
 }
 
@@ -524,6 +530,10 @@ alias kdiff="kustomize build | kubectl diff -f -"
 alias kgsecreg='kgsec registry -o yaml | yq r - "data.[.dockerconfigjson]" | base64 -d'
 alias kubeclean="kubectl config get-contexts | peco | awk '{ print \$1 }' | xargs -I _ kubectl config delete-context _"
 alias kdebug="kubectl run tmp-shell --rm -i --tty --image nicolaka/netshoot -- /bin/bash"
+alias krmpo="kubectl get pods | peco | awk '{ print \$1 }' | xargs -I _ kubectl delete pods _"
+alias kgpoy="kubectl get pods | peco | awk '{ print \$1 }' | xargs -I _ kubectl get pods _ -o yaml"
+alias kdpo="kubectl get pods | peco | awk '{ print \$1 }' | xargs -I _ kubectl describe pods _"
+alias klo="kubectl get pods | peco | awk '{ print \$1 }' | xargs -I _ kubectl logs -f _"
 
 ks() {
     local cluster=$(kubectl config get-contexts -o name | fzf -q "$1")
@@ -555,13 +565,13 @@ alias tapp="terraform apply"
 
 # system commands
 alias df="df -H"
-alias curl="gpg --batch -q -d ~/.authinfo.gpg | curl --netrc-file /dev/stdin"
+# alias curl="gpg --batch -q -d ~/.authinfo.gpg | curl --netrc-file /dev/stdin"
 
 # Changing Default programs
 if [[ "$(uname)" == "Darwin" ]]
 then
     alias wget=aria2c
-
+    alias cat=bat
 fi
 
 alias cat=bat
@@ -569,8 +579,11 @@ alias cat=bat
 # autojump
 alias j='autojump'
 
-# eza
+# exa
 alias ls='eza'
+alias l='eza --long --git'
+
+
 
 # find
 alias find='fd'

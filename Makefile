@@ -6,21 +6,19 @@ REPO_ROOT     := $(HOME)/projects/sw/repos/personal
 LN_FLAGS			= -sfn
 OS := $(shell uname -s)
 
-.PHONY: help brew emacs git ssh zsh zsh-setup
+.PHONY: help zsh kubernetes
 
-setup-common:: ## Setup common configs
-	@echo "Setting up directory structure"
-	@mkdir -p ~/projects/sw/repos/opensource
-	@mkdir -p ~/projects/sw/repos/personal
-	@mkdir -p ~/projects/sw/sandbox
-	@mkdir -p ~/projects/sw/gospace
+ai: ## Deploy ansible playbook for ai
+	echo "Deploying zsh playbook"
+	ansible-playbook -i $(CONFIG_ROOT)/ansible/hosts $(CONFIG_ROOT)/ansible/dotfiles.yml --ask-become-pass --tags ai
 
-ifeq ("$(wildcard $(HOME)/projects/sw/repos/personal/dotfiles)","")
-	@echo "Downloading the config repository"
-	@git clone https://github.com/ageekymonk/dotfiles.git $(HOME)/projects/sw/repos/personal/dotfiles
-	@echo "Jump to $(HOME)/projects/sw/repos/personal/dotfile and run make all"
-endif
+base: ## Deploy ansible playbook for base
+	echo "Deploying zsh playbook"
+	ansible-playbook -i $(CONFIG_ROOT)/ansible/hosts $(CONFIG_ROOT)/ansible/dotfiles.yml --ask-become-pass --tags base
 
+kubernetes: ## Deploy ansible playbook for kubernetes
+	echo "Deploying zsh playbook"
+	ansible-playbook -i $(CONFIG_ROOT)/ansible/hosts $(CONFIG_ROOT)/ansible/dotfiles.yml --ask-become-pass --tags kubernetes
 setup-mac:: ## Setup mac
 	@cd $(CONFIG_ROOT)
 ifeq ($(OS),Darwin)
@@ -28,16 +26,13 @@ ifeq ($(OS),Darwin)
 	@make osx
 endif
 
-setup-linux:: ## Setup Linux
-	@cd $(CONFIG_ROOT)
-	@ln $(LN_FLAGS) $(CONFIG_ROOT)/xmodmap/defaults ${HOME}/.xmodmap
-	@ln $(LN_FLAGS) $(CONFIG_ROOT)/xmodmap/xinitrc ${HOME}/.xinitrc
-	@make zsh
+devops: ## Deploy ansible playbook for devops
+	echo "Deploying zsh playbook"
+	ansible-playbook -i $(CONFIG_ROOT)/ansible/hosts $(CONFIG_ROOT)/ansible/dotfiles.yml --ask-become-pass --tags devops
 
-setup:: setup-common setup-mac ## Configure the laptop for fresh installation
-	@echo "Pulling in other submodules"
-	@git submodule init
-	@git submodule update
+zsh: ## Deploy ansible playbook for zsh
+	echo "Deploying zsh playbook"
+	ansible-playbook -i $(CONFIG_ROOT)/ansible/hosts $(CONFIG_ROOT)/ansible/dotfiles.yml --ask-become-pass --tags zsh
 
 	@make git
 	@make ssh-setup

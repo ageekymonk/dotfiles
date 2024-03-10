@@ -1,0 +1,51 @@
+- name: Install zsh
+  community.general.pacman: name=zsh state=present
+  become: yes
+  become_user: root
+  become_method: sudo
+
+- name: Check for oh-my-zsh installation
+  stat: "path=~/.oh-my-zsh"
+  register: oh_my_zsh_stat
+
+- name: Install oh-my-zsh
+  raw: "sh -c \"$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)\""
+  when: not oh_my_zsh_stat.stat.exists
+
+- name: Check for .zshrc
+  stat: path="{{dotfiles_user_home}}/.zshrc"
+  register: zshrc_stat
+
+- name: Back up .zshrc
+  command: mv ~/.zshrc ~/.zshrc.bak
+  args:
+    creates: "{{dotfiles_user_home}}/.zshrc.bak"
+  when: zshrc_stat.stat.exists
+
+- name: Remove .zshrc
+  command: rm ~/.zshrc
+  when: zshrc_stat.stat.exists
+
+- name: Symlink .zshrc
+  file:
+    src: "{{ dotfiles_home }}/zsh/zshrc"
+    dest: "{{dotfiles_user_home}}/.zshrc"
+    state: link
+
+- name: Symlink .zshenv
+  file:
+    src: "{{ dotfiles_home }}/zsh/zshenv"
+    dest: "{{dotfiles_user_home}}/.zshenv"
+    state: link
+
+- name: Symlink .zshalias
+  file:
+    src: "{{ dotfiles_home }}/zsh/zshalias"
+    dest: "{{dotfiles_user_home}}/.zshalias"
+    state: link
+
+- name: Symlink .p10k
+  file:
+    src: "{{ dotfiles_home }}/zsh/p10k.zsh"
+    dest: "{{dotfiles_user_home}}/.p10k.zsh"
+    state: link

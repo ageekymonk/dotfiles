@@ -1,0 +1,14 @@
+# - name: Install base packages
+#   community.general.pacman:
+#     name: "{{ item }}"
+#     state: present
+#   become: yes
+#   become_user: root
+#   become_method: sudo
+#   loop:
+#     - kubectl
+#     - kubectx
+#     - kustomize
+#     - helm
+
+- aur: name=python-databricks-cli

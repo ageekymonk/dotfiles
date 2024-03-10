@@ -1,7 +1,0 @@
-# -*- mode: snippet -*-
-# name: daz 
-# key: daz
-# --
-data "aws_availability_zones" "available" {
-  state = "available"
-}
