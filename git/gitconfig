@@ -128,15 +128,6 @@
 [diff "zip"]
   textconv = unzip -c -a
 
-
-[github]
-  user = cypher
-
-
-[credential]
-	helper = ""
-
-
 [status]
   submodulesummary = true
 
@@ -164,26 +155,6 @@
 [interactive]
   diffFilter = diff-highlight
 
-[gerrit]
-  defaultremote = origin
-
-[gitreview]
-  username = ageekymonk
-  scheme = https
-  port = 443
-  remote = origin
-[magithub]
-  online = false
-[magithub "status"]
-  includeStatusHeader = false
-  includePullRequestsSection = false
-  includeIssuesSection = false
-[difftool "sourcetree"]
-  cmd = opendiff \"$LOCAL\" \"$REMOTE\"
-  path =
-[mergetool "sourcetree"]
-  cmd = /Applications/Sourcetree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
-  trustExitCode = true
 [credential]
 	helper = manager-core
 	helper = 
@@ -192,3 +163,5 @@
 [credential "https://dev.azure.com"]
 	useHttpPath = false
 
+[maintenance]
+  strategy = incremental
