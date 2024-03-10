@@ -7,7 +7,7 @@
   whitespace = trailing-space,space-before-tab
   quotepath = false
   pager = less -FXR
-  editor = emacsclient -t
+  editor = code --wait
   autocrlf = input
 
 [http]
@@ -18,16 +18,15 @@
 [commit]
   gpgsign = false
 
-[gpg]
-  program = /usr/local/MacGPG2/bin/gpg2
-
 [include]
   path = alias.gitconfig
 
 [includeIf "gitdir:~/projects/sw/repos/personal"]
     path = gitconfig-personal
+
 [includeIf "gitdir:~/projects/sw/repos/techniumlabs"]
-    path = gitconfig-personal
+    path = gitconfig-techniumlabs
+
 
 [advice]
   pushNonFastForward = false
