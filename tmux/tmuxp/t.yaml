@@ -1,0 +1,19 @@
+session_name: k9s
+windows:
+  - window_name: dev
+    layout: tiled
+    panes:
+      - shell_command: # pane no. 1
+          - k9s --context dev-blue
+  - window_name: mgmt
+    layout: tiled
+    panes:
+      - shell_command: # pane no. 1
+          - k9s --context mgmt-green
+  - window_name: prod
+    layout: tiled
+    panes:
+      - shell_command: # pane no. 1
+          - k9s --context prod-green
+      - shell_command: # pane no. 1
+          - k9s --context prod-blue

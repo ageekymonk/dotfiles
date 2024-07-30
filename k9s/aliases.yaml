@@ -1,0 +1,7 @@
+aliases:
+  ss: apps/v1/statefulsets
+  dep: apps/v1/deployments
+  pp: v1/pods
+  kcp: kyverno.io/v1/clusterpolicies
+  cr: clusterrole
+  crb: clusterrolebinding

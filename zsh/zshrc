@@ -64,10 +64,6 @@ zinit load zsh-users/zsh-completions
 zinit load zsh-users/zsh-syntax-highlighting
 zinit load wfxr/forgit
 
-zinit as"program" atclone'fasd --init auto > fasd.zsh' \
-      atpull'%atclone' pick"fasd" src"fasd.zsh" nocompile'!' for \
-      clvv/fasd
-
 zinit as"program" make'!' atclone'./direnv hook zsh > zhook.zsh' \
       atpull'%atclone' pick"direnv" src"zhook.zsh" for \
       direnv/direnv
@@ -208,4 +204,6 @@ export AWS_VAULT_BACKEND=pass
 # bun
 export BUN_INSTALL="$HOME/.local/share/reflex/bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
-export AWS_VAULT_BACKEND=keychain
+export AWS_VAULT_BACKEND=pass
+
+source /usr/share/z/z.sh

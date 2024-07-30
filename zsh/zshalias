@@ -578,7 +578,7 @@ fi
 alias cat=bat
 
 # autojump
-alias j='autojump'
+alias j='z'
 
 # exa
 alias ls='eza'
