@@ -204,6 +204,59 @@ function aws-noncompliant-resources() {
     aws configservice describe-compliance-by-resource --compliance-types NON_COMPLIANT --resource-type ${rtype}
 }
 
+# SCP
+
+function listorgroot() {
+    aws organizations list-roots | jq -r -c '.Roots[] | [.Id, .Name] | @tsv' | awk '{ print $1 }'
+}
+
+function listous() {
+    aws organizations list-organizational-units-for-parent --parent-id $(listorgroot) | jq -r -c '.OrganizationalUnits[] | [.Id, .Name] | @tsv' | peco | awk '{ print $1 }'
+}
+
+function listscps() {
+    aws organizations list-policies --filter SERVICE_CONTROL_POLICY | jq -r -c '.Policies[] | [.Id, .Name] | @tsv' | peco | awk '{ print $1 }'
+}
+
+function detachscp() {
+    scp=$(listscps)
+    root=$(listous)
+    aws organizations detach-policy --policy-id ${scp} --target-id ${root}
+}
+
+function attachscp() {
+    scp=$(listscps)
+    root=$(listous)
+    aws organizations attach-policy --policy-id ${scp} --target-id ${root}
+}
+
+
+# Cloudformation
+function stacksets() {
+    aws cloudformation list-stack-sets \
+        --output text \
+        --query "
+        Summaries[].[
+          StackSetName,
+          Description,
+          Status
+        ]" |
+        sort -k 1 |
+        column -s$'\t' -t
+}
+
+function stackset-details() {
+    stacksets | peco | awk '{ print $1 }' | xargs -I {} aws cloudformation describe-stack-set --stack-set-name {}
+}
+
+function update-stackset() {
+    fname=$(ls | peco)
+    stacksets | peco | awk '{ print $1 }' | xargs -I {} aws cloudformation update-stack-set --stack-set-name {} --template-body file://./${fname} --capabilities CAPABILITY_NAMED_IAM
+}
+function stackset-instances() {
+    stacksets | peco | awk '{ print $1 }' | xargs -I {} aws cloudformation list-stack-instances --stack-set-name {}
+}
+
 # Cloudfront
 function cloudfronts() {
     aws cloudfront list-distributions \
