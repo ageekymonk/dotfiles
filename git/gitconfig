@@ -81,6 +81,8 @@
 [pull]
   rebase = true
 
+[rebase]
+  autostash = true
 
 [help]
   autocorrect = 0
@@ -101,11 +103,11 @@
   tool = vscode
   algorithm = histogram
   compactionHeuristic = true
+  external = difft
 
 
 [difftool]
   prompt = false
-
 
 [mergetool "vscode"]
   cmd = code --wait $MERGED
@@ -157,8 +159,6 @@
 
 [credential]
 	helper = manager-core
-	helper = 
-	helper = /usr/local/share/gcm-core/git-credential-manager
   
 [credential "https://dev.azure.com"]
 	useHttpPath = false
