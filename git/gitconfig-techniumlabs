@@ -1,3 +1,4 @@
 [user]
-    email = ramz@techniumlabs.io
+    email = ramzthecoder@gmail.com
     name = ramz
+    signingkey = ~/.ssh/id_ed25519_github.pub
