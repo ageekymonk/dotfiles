@@ -6,7 +6,9 @@
   "image": "mcr.microsoft.com/devcontainers/universal:2-linux",
   "features": {
     "ghcr.io/devcontainers/features/aws-cli:1": {},
-    "ghcr.io/devcontainers/features/azure-cli:1": {}
+    "ghcr.io/devcontainers/features/azure-cli:1": {},
+    "ghcr.io/devcontainers-contrib/features/asdf-package:1": {},
+    "ghcr.io/devcontainers-contrib/features/direnv-asdf:2": {}
   }
 
   // Features to add to the dev container. More info: https://containers.dev/features.
