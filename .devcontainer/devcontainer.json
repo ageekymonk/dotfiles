@@ -7,9 +7,7 @@
   "runArgs": ["--device=/dev/net/tun"],
   "features": {
     "ghcr.io/devcontainers/features/aws-cli:1": {},
-    "ghcr.io/devcontainers/features/azure-cli:1": {},
-    "ghcr.io/tailscale/codespace/tailscale": {},
-    "ghcr.io/audacioustux/devcontainers/k9s:1": {}
+    "ghcr.io/devcontainers/features/azure-cli:1": {}
   }
 
   // Features to add to the dev container. More info: https://containers.dev/features.
