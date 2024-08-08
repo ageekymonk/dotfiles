@@ -4,7 +4,6 @@
   "name": "Default Linux Universal",
   // Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
   "image": "mcr.microsoft.com/devcontainers/universal:2-linux",
-  "runArgs": ["--device=/dev/net/tun"],
   "features": {
     "ghcr.io/devcontainers/features/aws-cli:1": {},
     "ghcr.io/devcontainers/features/azure-cli:1": {}
