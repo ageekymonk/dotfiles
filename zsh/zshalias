@@ -230,6 +230,23 @@ function attachscp() {
     aws organizations attach-policy --policy-id ${scp} --target-id ${root}
 }
 
+function list-permission-sets() {
+    instance_store_id=$(bkt --ttl=1y -- aws sso-admin list-instances --query "Instances[0].IdentityStoreId")
+    instance_store_arn=$(bkt --ttl=1y -- aws sso-admin list-instances | jq -r -c '.Instances[0].InstanceArn')
+    permission_sets=$(bkt --ttl=1w -- aws sso-admin list-permission-sets --instance-arn ${instance_store_arn}) 
+    echo ${permission_sets} | jq -r -c '.PermissionSets[]' | \
+    xargs -I {} bkt --ttl=1w -- aws sso-admin describe-permission-set --instance-arn ${instance_store_arn} --permission-set-arn {} | jq -r -c '.PermissionSet | [.Name, .PermissionSetArn] | @tsv'
+}
+
+function edit-permission-sets-inline-policy() {
+    instance_store_id=$(bkt --ttl=1y -- aws sso-admin list-instances --query "Instances[0].IdentityStoreId")
+    instance_store_arn=$(bkt --ttl=1y -- aws sso-admin list-instances | jq -r -c '.Instances[0].InstanceArn')
+    permission_set=$(list-permission-sets | peco | awk '{ print $2 }')
+    policy=$( aws sso-admin get-inline-policy-for-permission-set --instance-arn ${instance_store_arn} --permission-set-arn ${permission_set} | jq -r -c '.InlinePolicy' | python -m json.tool | EDITOR=vim vipe | jq -r -c .)
+    aws sso-admin put-inline-policy-to-permission-set --instance-arn ${instance_store_arn} --permission-set-arn ${permission_set} --inline-policy ${policy}
+    aws sso-admin provision-permission-set --instance-arn ${instance_store_arn} --permission-set-arn ${permission_set} --target-type ALL_PROVISIONED_ACCOUNTS
+}
+
 
 # Cloudformation
 function stacksets() {
@@ -439,6 +456,34 @@ function disable-health-check() {
       ]"                |
         sort -k 4             |
         column -s$'\t' -t | peco | awk '{ print $1 }' | xargs -I {} aws route53 update-health-check --health-check-id {} --disabled
+}
+
+# sagemaker
+function sagemaker-notebooks() {
+    aws sagemaker list-notebook-instances \
+        --output text       \
+        --query '
+      NotebookInstances[].[
+        NotebookInstanceName,
+        NotebookInstanceStatus,
+        InstanceType,
+        CreationTime
+    ]'                  |
+        LC_ALL=C sort -b -k 3 |
+        column -s$'\t' -t
+}
+
+function sagemaker-notebook-stop() {
+    sagemaker-notebooks | peco | awk '{ print $1 }' | xargs -I {} aws sagemaker stop-notebook-instance --notebook-instance-name {}
+}
+
+function sagemaker-notebook-start() {
+    sagemaker-notebooks | peco | awk '{ print $1 }' | xargs -I {} aws sagemaker start-notebook-instance --notebook-instance-name {}
+}
+
+function sagemaker-notebook-resize() {
+    instance_size=$(aws --region us-east-1 pricing get-products --service-code AmazonSageMaker --filters Type=TERM_MATCH,Field=regionCode,Value=us-east-1 | jq -r '.PriceList[]|fromjson|select(.product.productFamily == "ML Instance")|.product.attributes.instanceName' | sort | uniq | peco)
+    sagemaker-notebooks | peco | awk '{ print $1 }' | xargs -I {} aws sagemaker update-notebook-instance --notebook-instance-name {} --instance-type ${instance_size}
 }
 
 # S3
