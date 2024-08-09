@@ -206,25 +206,25 @@ function aws-noncompliant-resources() {
 
 # SCP
 
-function listorgroot() {
+function list-org-root() {
     aws organizations list-roots | jq -r -c '.Roots[] | [.Id, .Name] | @tsv' | awk '{ print $1 }'
 }
 
-function listous() {
+function list-ous() {
     aws organizations list-organizational-units-for-parent --parent-id $(listorgroot) | jq -r -c '.OrganizationalUnits[] | [.Id, .Name] | @tsv' | peco | awk '{ print $1 }'
 }
 
-function listscps() {
+function list-scps() {
     aws organizations list-policies --filter SERVICE_CONTROL_POLICY | jq -r -c '.Policies[] | [.Id, .Name] | @tsv' | peco | awk '{ print $1 }'
 }
 
-function detachscp() {
+function detach-scp() {
     scp=$(listscps)
     root=$(listous)
     aws organizations detach-policy --policy-id ${scp} --target-id ${root}
 }
 
-function attachscp() {
+function attach-scp() {
     scp=$(listscps)
     root=$(listous)
     aws organizations attach-policy --policy-id ${scp} --target-id ${root}
@@ -247,9 +247,15 @@ function edit-permission-sets-inline-policy() {
     aws sso-admin provision-permission-set --instance-arn ${instance_store_arn} --permission-set-arn ${permission_set} --target-type ALL_PROVISIONED_ACCOUNTS
 }
 
+function list-groups() {
+    instance_store_id=$(bkt --ttl=1y -- aws sso-admin list-instances | jq -r -c '.Instances[0].IdentityStoreId')
+    instance_store_arn=$(bkt --ttl=1y -- aws sso-admin list-instances | jq -r -c '.Instances[0].InstanceArn')
+    groups=$(bkt --ttl=1w -- aws identitystore list-groups --identity-store-id ${instance_store_id} | jq -r -c '.Groups[]')
+    echo ${groups} | jq -r -c '.| [.DisplayName, .GroupId] | @tsv' 
+}
 
 # Cloudformation
-function stacksets() {
+function list-stacksets() {
     aws cloudformation list-stack-sets \
         --output text \
         --query "
@@ -262,7 +268,7 @@ function stacksets() {
         column -s$'\t' -t
 }
 
-function stackset-details() {
+function get-stackset-details() {
     stacksets | peco | awk '{ print $1 }' | xargs -I {} aws cloudformation describe-stack-set --stack-set-name {}
 }
 
@@ -270,7 +276,8 @@ function update-stackset() {
     fname=$(ls | peco)
     stacksets | peco | awk '{ print $1 }' | xargs -I {} aws cloudformation update-stack-set --stack-set-name {} --template-body file://./${fname} --capabilities CAPABILITY_NAMED_IAM
 }
-function stackset-instances() {
+
+function get-stackset-instances() {
     stacksets | peco | awk '{ print $1 }' | xargs -I {} aws cloudformation list-stack-instances --stack-set-name {}
 }
 
