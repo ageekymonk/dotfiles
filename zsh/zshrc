@@ -14,6 +14,7 @@ then
     source $HOMEBREW_PREFIX/opt/zinit/zinit.zsh
     . $HOMEBREW_PREFIX/opt/asdf/libexec/asdf.sh
     . $HOMEBREW_PREFIX/etc/profile.d/z.sh
+    export AWS_VAULT_BACKEND=keychain
 
 elif [[ "$(uname)" == "Linux" ]]
 then
@@ -34,6 +35,7 @@ then
     source "$HOME/.zinit/bin/zinit.zsh"
     . $HOME/.asdf/asdf.sh
     source /usr/share/z/z.sh
+    export AWS_VAULT_BACKEND=pass
 fi
 
 # Oh My ZSH Configuration
@@ -200,12 +202,11 @@ export REDO_HISTORY_PATH=~/.zsh_history
 # This is for aws cli
 export PAGER=
 
-export AWS_VAULT_BACKEND=pass
 # bun completions
 [ -s "/home/ramz/.local/share/reflex/bun/_bun" ] && source "/home/ramz/.local/share/reflex/bun/_bun"
 
 # bun
 export BUN_INSTALL="$HOME/.local/share/reflex/bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
-export AWS_VAULT_BACKEND=pass
+
 

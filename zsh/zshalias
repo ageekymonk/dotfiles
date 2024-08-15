@@ -191,11 +191,21 @@ ftpane() {
   fi
 }
 
+
 # AWS Aliases
 
 # account
 function account-id() {
     aws sts get-caller-identity --query 'Account' --output text
+}
+
+# Certificate Manager
+function acm-import-cert() {
+    local certfile=$(ls | peco)
+    local key=$(ls | peco)
+    # Extract lines between first Begin and End 
+    sed '/-----BEGIN CERTIFICATE-----/,/-----END CERTIFICATE-----/!d;/-----END CERTIFICATE-----/q' $certfile > ${certfile_cert%%.crt}.pem
+    aws acm import-certificate --certificate fileb://${certfile_cert%%.crt}.pem --private-key fileb://${key}
 }
 
 # config
