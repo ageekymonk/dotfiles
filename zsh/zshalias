@@ -214,6 +214,15 @@ function aws-noncompliant-resources() {
     aws configservice describe-compliance-by-resource --compliance-types NON_COMPLIANT --resource-type ${rtype}
 }
 
+# datasync
+
+function datasync-tasks-running() {
+    aws datasync list-tasks --query "Tasks[?Status=='RUNNING']" | jq -r -c '.[] | [.Name, .TaskArn, .Status, .Options.SourceLocationArn, .Options.DestinationLocationArn] | @tsv'
+}
+
+function datasync-task-executions-failed() {
+    aws datasync list-task-executions --query "TaskExecutions[?Status=='ERROR']"
+}
 # SCP
 
 function list-org-root() {
@@ -252,7 +261,7 @@ function edit-permission-sets-inline-policy() {
     instance_store_id=$(bkt --ttl=1y -- aws sso-admin list-instances --query "Instances[0].IdentityStoreId")
     instance_store_arn=$(bkt --ttl=1y -- aws sso-admin list-instances | jq -r -c '.Instances[0].InstanceArn')
     permission_set=$(list-permission-sets | peco | awk '{ print $2 }')
-    policy=$( aws sso-admin get-inline-policy-for-permission-set --instance-arn ${instance_store_arn} --permission-set-arn ${permission_set} | jq -r -c '.InlinePolicy' | python -m json.tool | EDITOR=vim vipe | jq -r -c .)
+    policy=$( aws sso-admin get-inline-policy-for-permission-set --instance-arn ${instance_store_arn} --permission-set-arn ${permission_set} | jq -r -c '.InlinePolicy' | python -m json.tool | EDITOR="code -w" vipe | jq -r -c .)
     aws sso-admin put-inline-policy-to-permission-set --instance-arn ${instance_store_arn} --permission-set-arn ${permission_set} --inline-policy ${policy}
     aws sso-admin provision-permission-set --instance-arn ${instance_store_arn} --permission-set-arn ${permission_set} --target-type ALL_PROVISIONED_ACCOUNTS
 }
@@ -266,7 +275,7 @@ function list-groups() {
 
 # Cloudformation
 function list-stacksets() {
-    aws cloudformation list-stack-sets \
+    gum spin --title "Fetching Stacksets" -- aws cloudformation list-stack-sets \
         --output text \
         --query "
         Summaries[].[
@@ -278,17 +287,38 @@ function list-stacksets() {
         column -s$'\t' -t
 }
 
+function list-stacks() {
+    gum spin --title "Fetching Stacks" -- aws cloudformation list-stacks \
+            --output text \
+            --query "
+            StackSummaries[].[
+            StackName,
+            StackStatus,
+            StackId
+            ]" |
+            sort -k 1 |
+            column -s$'\t' -t
+}
+
 function get-stackset-details() {
-    stacksets | peco | awk '{ print $1 }' | xargs -I {} aws cloudformation describe-stack-set --stack-set-name {}
+    list-stacksets | peco | awk '{ print $1 }' | xargs -I {} aws cloudformation describe-stack-set --stack-set-name {}
 }
 
 function update-stackset() {
-    fname=$(ls | peco)
-    stacksets | peco | awk '{ print $1 }' | xargs -I {} aws cloudformation update-stack-set --stack-set-name {} --template-body file://./${fname} --capabilities CAPABILITY_NAMED_IAM
+    fname=$(gum file)
+    # if fname is set
+    if [ -n "$fname" ]; then
+        list-stacksets | peco | awk '{ print $1 }' | xargs -I {} aws cloudformation update-stack-set --stack-set-name {} --template-body file://./${fname} --capabilities CAPABILITY_NAMED_IAM
+    fi
 }
 
 function get-stackset-instances() {
-    stacksets | peco | awk '{ print $1 }' | xargs -I {} aws cloudformation list-stack-instances --stack-set-name {}
+    list-stacksets | peco | awk '{ print $1 }' | xargs -I {} aws cloudformation list-stack-instances --stack-set-name {} | jq -r -c '.Summaries[] | [.Account, .Status, .StackInstanceStatus.DetailedStatus] | @tsv'
+}
+
+function update-stack() {
+    fname=$(gum file)
+    list-stacks | peco | awk '{ print $1 }' | xargs -I {} aws cloudformation update-stack --stack-name {} --template-body file://./${fname} --capabilities CAPABILITY_NAMED_IAM
 }
 
 # Cloudfront
@@ -314,10 +344,43 @@ function cloudfront-add-tag() {
 
 # ec2
 
+function list-ec2-instances() {
+    gum spin --title "Fetching EC2 Instances" -- aws ec2 describe-instances \
+        --output text \
+        --query "
+        Reservations[].Instances[].[
+          InstanceId,
+          [Tags[?Key=='Name'].Value][0][0],
+          State.Name,
+          InstanceType,
+          PublicIpAddress,
+          PrivateIpAddress
+        ]" |
+        sort -k 1 |
+        column -s$'\t' -t
+}
+
+function list-ec2-snapshots() {
+    aws ec2 describe-snapshots \
+        --owner self \
+        --output text \
+        --query "
+        Snapshots[].[
+          SnapshotId,
+          [Tags[?Key=='Name'].Value][0][0],
+          State,
+          Encrypted,
+          StartTime,
+          Description
+        ]" |
+        sort -k 5 |
+        column -s$'\t' -t
+}
+
 function instance-add-tag() {
     name=$1
     value=$2
-    instances | peco | awk '{ print $1 } ' | xargs -I {} aws ec2 create-tags --resources {} --tags Key=$name,Value=$value
+    list-ec2-instances | peco | awk '{ print $1 } ' | xargs -I {} aws ec2 create-tags --resources {} --tags Key=$name,Value=$value
 }
 
 function volumes() {
