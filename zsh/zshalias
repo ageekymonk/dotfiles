@@ -201,8 +201,8 @@ function account-id() {
 
 # Certificate Manager
 function acm-import-cert() {
-    local certfile=$(ls | peco)
-    local key=$(ls | peco)
+    local certfile=$(gum file)
+    local key=$(gum file)
     # Extract lines between first Begin and End 
     sed '/-----BEGIN CERTIFICATE-----/,/-----END CERTIFICATE-----/!d;/-----END CERTIFICATE-----/q' $certfile > ${certfile_cert%%.crt}.pem
     aws acm import-certificate --certificate fileb://${certfile_cert%%.crt}.pem --private-key fileb://${key}
@@ -567,16 +567,28 @@ function sagemaker-notebook-resize() {
 }
 
 # S3
-function bucket-policy() {
-  aws s3api list-buckets \
-    --output text        \
-    --query "
-      Buckets[${buckets:+?contains(['${buckets// /"','"}'], Name)}].[
+function list-buckets() {
+    gum spin --title "Fetching Buckets" -- aws s3api list-buckets \
+        --output text        \
+        --query "
+      Buckets[].[
         Name,
         CreationDate
       ]"                |
-  grep -E -- "$filters" |
-  column -t | peco | awk '{ print $1 }' | xargs -I {} aws s3api get-bucket-policy --bucket {} | jq -r -c '.Policy' | jq .
+        grep -E -- "$filters" |
+        column -t
+}
+
+function show-bucket-versioning() {
+    list-buckets | peco | awk '{ print $1 }' | xargs -I {} aws s3api get-bucket-versioning --bucket {}
+}
+
+function enable-bucket-versioning() {
+    list-buckets | peco | awk '{ print $1 }' | xargs -I {} aws s3api put-bucket-versioning --bucket {} --versioning-configuration Status=Enabled
+}
+
+function bucket-policy() {
+  list-buckets | peco | awk '{ print $1 }' | xargs -I {} aws s3api get-bucket-policy --bucket {} | jq -r -c '.Policy' | jq .
 }
 
 bucket-add-tag() {
