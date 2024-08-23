@@ -1,6 +1,7 @@
 {
   "Keymap": {
     "C-r": "peco.SelectVisible",
-    "C-e": "peco.RotateFilter"
+    "C-e": "peco.RotateFilter",
+    "C-a": "peco.SelectAll"
   }
 }
