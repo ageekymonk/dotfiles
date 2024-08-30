@@ -193,7 +193,7 @@ ftpane() {
 
 
 # AWS
-source ./awsalias
+source ~/.awsalias
 
 # Azure
 

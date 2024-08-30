@@ -284,6 +284,29 @@ function efs-recovery-points() {
 }
 
 # IAM
+function list-iam-roles() {
+    gum spin --title "Fetching IAM Roles" -- aws iam list-roles \
+        --output text       \
+        --query '
+      Roles[].[
+        RoleName,
+        Arn
+    ]'                  |
+        LC_ALL=C sort -b -k 1 |
+        column -s$'\t' -t
+}
+
+function get-iam-role-trust-policy() {
+    list-iam-roles | peco | awk '{ print $1 }' | xargs -I {} aws iam get-role --role-name {} | jq -r -c '.Role.AssumeRolePolicyDocument'
+}
+
+function edit-iam-role-inline-policy() {
+    rolename=$(list-iam-roles | peco --select-1 | awk '{ print $1 }')
+    inline_policy=$(aws iam list-role-policies --role-name ${rolename} | jq -r -c '.PolicyNames[]' | peco)
+    policy=$(aws iam get-role-policy --role-name ${rolename} --policy-name ${inline_policy} | jq -r -c '.PolicyDocument' | python -m json.tool | EDITOR="code -w" vipe | jq -r -c .)
+    aws iam put-role-policy --role-name ${rolename} --policy-name ${inline_policy} --policy-document ${policy}
+}
+
 function iam-policy() {
     export AWS_PAGER=""
     aws iam list-policies \

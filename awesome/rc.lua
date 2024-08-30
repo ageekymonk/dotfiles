@@ -343,7 +343,11 @@ globalkeys = gears.table.join(
               {description = "run prompt", group = "launcher"}),
 
     awful.key({ modkey }, "space", function()
-        awful.util.spawn("rofi -combi-modes drun,window, -theme solarized -show combi")
+        awful.util.spawn("rofi -combi-modes drun,window -theme solarized -show combi")
+    end, { description = "run prompt", group = "launcher" }),
+
+    awful.key({ modkey }, "/", function()
+        awful.util.spawn("rofi -show calc -modi calc -no-show-match -no-sort -automatic-save-to-history")
     end, { description = "run prompt", group = "launcher" }),
 
     awful.key({ modkey }, "x",
