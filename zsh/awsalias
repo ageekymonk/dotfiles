@@ -36,7 +36,7 @@ function list-org-root() {
 }
 
 function list-ous() {
-    aws organizations list-organizational-units-for-parent --parent-id $(listorgroot) | jq -r -c '.OrganizationalUnits[] | [.Id, .Name] | @tsv' | peco | awk '{ print $1 }'
+    aws organizations list-organizational-units-for-parent --parent-id $(list-org-root) | jq -r -c '.OrganizationalUnits[] | [.Id, .Name] | @tsv' | peco | awk '{ print $1 }'
 }
 
 function list-scps() {
@@ -61,6 +61,13 @@ function list-permission-sets() {
     permission_sets=$(bkt --ttl=1w -- aws sso-admin list-permission-sets --instance-arn ${instance_store_arn}) 
     echo ${permission_sets} | jq -r -c '.PermissionSets[]' | \
     xargs -I {} bkt --ttl=1w -- aws sso-admin describe-permission-set --instance-arn ${instance_store_arn} --permission-set-arn {} | jq -r -c '.PermissionSet | [.Name, .PermissionSetArn] | @tsv'
+}
+
+function show-permission-sets-inline-policy() {
+    instance_store_id=$(bkt --ttl=1y -- aws sso-admin list-instances --query "Instances[0].IdentityStoreId")
+    instance_store_arn=$(bkt --ttl=1y -- aws sso-admin list-instances | jq -r -c '.Instances[0].InstanceArn')
+    permission_set=$(list-permission-sets | peco | awk '{ print $2 }')
+    aws sso-admin get-inline-policy-for-permission-set --instance-arn ${instance_store_arn} --permission-set-arn ${permission_set} | jq -r -c '.InlinePolicy'| python -m json.tool | EDITOR="cursor -w" vipe | python -m json.tool
 }
 
 function edit-permission-sets-inline-policy() {
@@ -127,6 +134,11 @@ function update-stack() {
     list-stacks | peco | awk '{ print $1 }' | xargs -I {} aws cloudformation update-stack --stack-name {} --template-body file://./${fname} --capabilities CAPABILITY_NAMED_IAM
 }
 
+function create-stack() {
+    fname=$(gum file)
+    stackname=$(gum input --placeholder "Stack Name")
+    aws cloudformation create-stack --stack-name ${stackname} --template-body file://${fname} --capabilities CAPABILITY_NAMED_IAM
+}
 # Cloudfront
 function cloudfronts() {
     aws cloudfront list-distributions \
@@ -418,6 +430,12 @@ function enable-bucket-versioning() {
 
 function bucket-policy() {
   list-buckets | peco | awk '{ print $1 }' | xargs -I {} aws s3api get-bucket-policy --bucket {} | jq -r -c '.Policy' | jq .
+}
+
+function edit-bucket-policy() {
+    bucketname=$(list-buckets | peco | awk '{ print $1 }')
+    policy=$(aws s3api get-bucket-policy --bucket $bucketname | jq -r -c '.Policy' | EDITOR="code -w" vipe)
+    aws s3api put-bucket-policy --bucket $bucketname --policy "$policy"
 }
 
 bucket-add-tag() {
