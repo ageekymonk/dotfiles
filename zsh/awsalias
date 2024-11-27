@@ -44,14 +44,14 @@ function list-scps() {
 }
 
 function detach-scp() {
-    scp=$(listscps)
-    root=$(listous)
+    scp=$(list-scps)
+    root=$(list-ous)
     aws organizations detach-policy --policy-id ${scp} --target-id ${root}
 }
 
 function attach-scp() {
-    scp=$(listscps)
-    root=$(listous)
+    scp=$(list-scps)
+    root=$(list-ous)
     aws organizations attach-policy --policy-id ${scp} --target-id ${root}
 }
 
@@ -67,14 +67,14 @@ function show-permission-sets-inline-policy() {
     instance_store_id=$(bkt --ttl=1y -- aws sso-admin list-instances --query "Instances[0].IdentityStoreId")
     instance_store_arn=$(bkt --ttl=1y -- aws sso-admin list-instances | jq -r -c '.Instances[0].InstanceArn')
     permission_set=$(list-permission-sets | peco | awk '{ print $2 }')
-    aws sso-admin get-inline-policy-for-permission-set --instance-arn ${instance_store_arn} --permission-set-arn ${permission_set} | jq -r -c '.InlinePolicy'| python -m json.tool | EDITOR="cursor -w" vipe | python -m json.tool
+    aws sso-admin get-inline-policy-for-permission-set --instance-arn ${instance_store_arn} --permission-set-arn ${permission_set} | jq -r -c '.InlinePolicy' | python -m json.tool | EDITOR="cursor -w" vipe | python -m json.tool
 }
 
 function edit-permission-sets-inline-policy() {
     instance_store_id=$(bkt --ttl=1y -- aws sso-admin list-instances --query "Instances[0].IdentityStoreId")
     instance_store_arn=$(bkt --ttl=1y -- aws sso-admin list-instances | jq -r -c '.Instances[0].InstanceArn')
     permission_set=$(list-permission-sets | peco | awk '{ print $2 }')
-    policy=$( aws sso-admin get-inline-policy-for-permission-set --instance-arn ${instance_store_arn} --permission-set-arn ${permission_set} | jq -r -c '.InlinePolicy' | python -m json.tool | EDITOR="code -w" vipe | jq -r -c .)
+    policy=$( aws sso-admin get-inline-policy-for-permission-set --instance-arn ${instance_store_arn} --permission-set-arn ${permission_set} | jq -r -c '.InlinePolicy' | python -m json.tool | EDITOR="cursor -w" vipe | jq -r -c .)
     aws sso-admin put-inline-policy-to-permission-set --instance-arn ${instance_store_arn} --permission-set-arn ${permission_set} --inline-policy ${policy}
     aws sso-admin provision-permission-set --instance-arn ${instance_store_arn} --permission-set-arn ${permission_set} --target-type ALL_PROVISIONED_ACCOUNTS
 }
@@ -89,28 +89,28 @@ function list-groups() {
 # Cloudformation
 function list-stacksets() {
     gum spin --title "Fetching Stacksets" -- aws cloudformation list-stack-sets \
-        --output text \
-        --query "
+    --output text \
+    --query "
         Summaries[].[
           StackSetName,
           Description,
           Status
         ]" |
-        sort -k 1 |
-        column -s$'\t' -t
+    sort -k 1 |
+    column -s$'\t' -t
 }
 
 function list-stacks() {
     gum spin --title "Fetching Stacks" -- aws cloudformation list-stacks \
-            --output text \
-            --query "
+    --output text \
+    --query "
             StackSummaries[].[
             StackName,
             StackStatus,
             StackId
             ]" |
-            sort -k 1 |
-            column -s$'\t' -t
+    sort -k 1 |
+    column -s$'\t' -t
 }
 
 function get-stackset-details() {
@@ -121,7 +121,7 @@ function update-stackset() {
     fname=$(gum file)
     # if fname is set
     if [ -n "$fname" ]; then
-        list-stacksets | peco | awk '{ print $1 }' | xargs -I {} aws cloudformation update-stack-set --stack-set-name {} --template-body file://./${fname} --capabilities CAPABILITY_NAMED_IAM
+    list-stacksets | peco | awk '{ print $1 }' | xargs -I {} aws cloudformation update-stack-set --stack-set-name {} --template-body file://${fname} --capabilities CAPABILITY_NAMED_IAM
     fi
 }
 
@@ -131,7 +131,7 @@ function get-stackset-instances() {
 
 function update-stack() {
     fname=$(gum file)
-    list-stacks | peco | awk '{ print $1 }' | xargs -I {} aws cloudformation update-stack --stack-name {} --template-body file://./${fname} --capabilities CAPABILITY_NAMED_IAM
+    list-stacks | peco | awk '{ print $1 }' | xargs -I {} aws cloudformation update-stack --stack-name {} --template-body file://${fname} --capabilities CAPABILITY_NAMED_IAM
 }
 
 function create-stack() {
@@ -139,18 +139,22 @@ function create-stack() {
     stackname=$(gum input --placeholder "Stack Name")
     aws cloudformation create-stack --stack-name ${stackname} --template-body file://${fname} --capabilities CAPABILITY_NAMED_IAM
 }
+
+function get-stack-details() {
+    list-stacks | peco | awk '{ print $1 }' | xargs -I {} aws cloudformation describe-stacks --stack-name {}
+}
 # Cloudfront
 function cloudfronts() {
     aws cloudfront list-distributions \
-        --output text \
-        --query "
+    --output text \
+    --query "
         DistributionList.Items[].[
           Aliases.Items[0],
           Status,
           ARN
         ]" |
-        sort -k 1 |
-        column -s$'\t' -t
+    sort -k 1 |
+    column -s$'\t' -t
 
 }
 
@@ -164,8 +168,8 @@ function cloudfront-add-tag() {
 
 function list-ec2-instances() {
     gum spin --title "Fetching EC2 Instances" -- aws ec2 describe-instances \
-        --output text \
-        --query "
+    --output text \
+    --query "
         Reservations[].Instances[].[
           InstanceId,
           [Tags[?Key=='Name'].Value][0][0],
@@ -174,15 +178,15 @@ function list-ec2-instances() {
           PublicIpAddress,
           PrivateIpAddress
         ]" |
-        sort -k 1 |
-        column -s$'\t' -t
+    sort -k 1 |
+    column -s$'\t' -t
 }
 
 function list-ec2-snapshots() {
     aws ec2 describe-snapshots \
-        --owner self \
-        --output text \
-        --query "
+    --owner self \
+    --output text \
+    --query "
         Snapshots[].[
           SnapshotId,
           [Tags[?Key=='Name'].Value][0][0],
@@ -191,20 +195,20 @@ function list-ec2-snapshots() {
           StartTime,
           Description
         ]" |
-        sort -k 5 |
-        column -s$'\t' -t
+    sort -k 5 |
+    column -s$'\t' -t
 }
 
 function instance-add-tag() {
     name=$1
     value=$2
-    list-ec2-instances | peco | awk '{ print $1 } ' | xargs -I {} aws ec2 create-tags --resources {} --tags Key=$name,Value=$value
+    list-ec2-instances | peco | awk '{ print $1 } ' | xargs -I {} aws ec2 create-tags --resources {} --tags Key=$name, Value=$value
 }
 
 function volumes() {
     aws ec2 describe-volumes \
-        --output text \
-        --query "
+    --output text \
+    --query "
         Volumes[].[
           VolumeId,
           [Tags[?Key=='Name'].Value][0][0],
@@ -212,27 +216,27 @@ function volumes() {
           State,
           Encrypted
         ]" |
-        sort -k 1 |
-        column -s$'\t' -t
+    sort -k 1 |
+    column -s$'\t' -t
 }
 
 function volume-add-tag() {
     name=$1
     value=$2
-    volumes | peco | awk '{ print $1 } ' | xargs -I {} aws ec2 create-tags --resources {} --tags Key=$name,Value=$value
+    volumes | peco | awk '{ print $1 } ' | xargs -I {} aws ec2 create-tags --resources {} --tags Key=$name, Value=$value
 }
 
 function elbv2-add-tag() {
     name=$1
     value=$2
-    elbv2s | peco | awk '{ print $5 }' | xargs -I {} aws elbv2 add-tags --resource-arns {} --tags Key=$name,Value=$value
+    elbv2s | peco | awk '{ print $5 }' | xargs -I {} aws elbv2 add-tags --resource-arns {} --tags Key=$name, Value=$value
 }
 
 function delete-snapshots() {
     aws ec2 describe-snapshots \
-        --owner self \
-        --output text \
-        --query "
+    --owner self \
+    --output text \
+    --query "
         Snapshots[].[
           SnapshotId,
           [Tags[?Key=='Name'].Value][0][0],
@@ -241,34 +245,34 @@ function delete-snapshots() {
           StartTime,
           Description
         ]" |
-        sort -k 5 |
-        column -s$'\t' -t | peco | awk '{ print $1 }' | xargs -I {} aws ec2 delete-snapshot --snapshot-id {}
+    sort -k 5 |
+    column -s$'\t' -t | peco | awk '{ print $1 }' | xargs -I {} aws ec2 delete-snapshot --snapshot-id {}
 }
 
 function elbv2-target-group-register-ip() {
     tg=$(elbv2s | elbv2-target-groups | peco | awk '{ print $1 }')
-    instances | peco | instance-ip | awk '{ print $2 }' | xargs -I {} aws elbv2 register-targets --target-group-arn=${tg} --targets Id={}
+    instances | peco | instance-ip | awk '{ print $2 }' | xargs -I {} aws elbv2 register-targets --target-group-arn=${tg} --targets Id= {}
 }
 
 
 function efs() {
     aws efs describe-file-systems \
-        --output text \
-        --query "
+    --output text \
+    --query "
         FileSystems[].[
           FileSystemId,
           Name,
           PerformanceMode,
           Encrypted
         ]" |
-        sort -k 1 |
-        column -s$'\t' -t
+    sort -k 1 |
+    column -s$'\t' -t
 }
 
 function efs-add-tag() {
     name=$1
     value=$2
-    efs | peco | awk '{ print $1 }' | xargs -I {} aws efs tag-resource --resource-id {} --tags Key=$1,Value=$2
+    efs | peco | awk '{ print $1 }' | xargs -I {} aws efs tag-resource --resource-id {} --tags Key=$1, Value=$2
 }
 
 function efs-add-lifecycle() {
@@ -282,8 +286,8 @@ function efs-recovery-points() {
     region=$(aws configure get region)
     efsid=$(efs | peco | awk '{ print $1 }')
     aws backup list-recovery-points-by-resource --resource-arn arn:aws:elasticfilesystem:${region}:${accountid}:file-system/${efsid} \
-        --output text \
-        --query "
+    --output text \
+    --query "
         RecoveryPoints[].[
           RecoveryPointArn,
           CreationDate,
@@ -291,21 +295,21 @@ function efs-recovery-points() {
           Status,
           BackupVaultName
         ]" |
-        column -s$'\t' -t | gawk '{ $2=strftime("%Y-%m-%d %H:%M:%S", $2); print $0 }' |
-        sort -k 2
+    column -s$'\t' -t | gawk '{ $2=strftime("%Y-%m-%d %H:%M:%S", $2); print $0 }' |
+    sort -k 2
 }
 
 # IAM
 function list-iam-roles() {
     gum spin --title "Fetching IAM Roles" -- aws iam list-roles \
-        --output text       \
-        --query '
+    --output text       \
+    --query '
       Roles[].[
         RoleName,
         Arn
     ]'                  |
-        LC_ALL=C sort -b -k 1 |
-        column -s$'\t' -t
+    LC_ALL=C sort -b -k 1 |
+    column -s$'\t' -t
 }
 
 function get-iam-role-trust-policy() {
@@ -319,32 +323,56 @@ function edit-iam-role-inline-policy() {
     aws iam put-role-policy --role-name ${rolename} --policy-name ${inline_policy} --policy-document ${policy}
 }
 
+function clone-iam-role() {
+    rolename=$(list-iam-roles | peco --select-1 | awk '{ print $1 }')
+    newrolename=$(gum input --placeholder "New Role Name")
+    aws iam create-role --role-name ${newrolename} --assume-role-policy-document $(get-iam-role-trust-policy)
+    while read policyname; 
+    do 
+        policydocument=$(aws iam get-role-policy --role-name ${rolename} --policy-name ${policyname} | jq -r -c '.PolicyDocument'); 
+        aws iam put-role-policy --role-name ${newrolename} --policy-name ${policyname} --policy-document ${policydocument}
+    
+    done < <(aws iam list-role-policies --role-name ${rolename} | jq -r -c '.PolicyNames[]')
+
+
+    while read attachedpolicy;
+    do
+        aws iam attach-role-policy --role-name ${newrolename} --policy-arn ${attachedpolicy}
+    done < <(aws iam list-attached-role-policies --role-name ${rolename} | jq -r -c '.AttachedPolicies[].PolicyArn')
+}
+
+function edit-iam-role-trust-policy() {
+    rolename=$(list-iam-roles | peco --select-1 | awk '{ print $1 }')
+    policy=$(aws iam get-role --role-name ${rolename} | jq -r -c '.Role.AssumeRolePolicyDocument' | python -m json.tool | EDITOR="code -w" vipe | jq -r -c .)
+    aws iam update-assume-role-policy --role-name ${rolename} --policy-document ${policy}
+}
+
 function iam-policy() {
     export AWS_PAGER=""
     aws iam list-policies \
-        --output text       \
-        --query '
+    --output text       \
+    --query '
       Policies[].[
         PolicyName,
         Arn,
         DefaultVersionId
     ]'                  |
-        LC_ALL=C sort -b -k 3 |
-        column -s$'\t' -t | peco | awk '{ system("aws iam get-policy-version --policy-arn " $2 " --version-id "$3) }'
+    LC_ALL=C sort -b -k 3 |
+    column -s$'\t' -t | peco | awk '{ system("aws iam get-policy-version --policy-arn " $2 " --version-id "$3) }'
 
 }
 
 function iam-instance-profiles() {
     aws iam list-instance-profiles \
-        --output text       \
-        --query '
+    --output text       \
+    --query '
       InstanceProfiles[].[
         InstanceProfileName,
         Arn,
         DefaultVersionId
     ]'                  |
-        LC_ALL=C sort -b -k 3 |
-        column -s$'\t' -t
+    LC_ALL=C sort -b -k 3 |
+    column -s$'\t' -t
 
 }
 
@@ -356,42 +384,42 @@ function delete-instance-profiles() {
 function rds-instance-add-tag() {
     name=$1
     value=$2
-    rds-db-instances | peco | awk '{ print $6 }' | xargs -I {} aws rds add-tags-to-resource --resource-name {} --tags Key=$1,Value=$2
+    rds-db-instances | peco | awk '{ print $6 }' | xargs -I {} aws rds add-tags-to-resource --resource-name {} --tags Key=$1, Value=$2
 }
 
 function rds-cluster-add-tag() {
     name=$1
     value=$2
-    rds-db-clusters | peco | awk '{ print $5 }' | xargs -I {} aws rds add-tags-to-resource --resource-name {} --tags Key=$1,Value=$2
+    rds-db-clusters | peco | awk '{ print $5 }' | xargs -I {} aws rds add-tags-to-resource --resource-name {} --tags Key=$1, Value=$2
 }
 
 # Route53
 function disable-health-check() {
 
     aws route53 list-health-checks \
-        --output text               \
-        --query "
+    --output text               \
+    --query "
       healthchecks[].[
         id,
         healthcheckconfig.fullyqualifieddomainname
       ]"                |
-        sort -k 4             |
-        column -s$'\t' -t | peco | awk '{ print $1 }' | xargs -I {} aws route53 update-health-check --health-check-id {} --disabled
+    sort -k 4             |
+    column -s$'\t' -t | peco | awk '{ print $1 }' | xargs -I {} aws route53 update-health-check --health-check-id {} --disabled
 }
 
 # sagemaker
 function sagemaker-notebooks() {
     aws sagemaker list-notebook-instances \
-        --output text       \
-        --query '
+    --output text       \
+    --query '
       NotebookInstances[].[
         NotebookInstanceName,
         NotebookInstanceStatus,
         InstanceType,
         CreationTime
     ]'                  |
-        LC_ALL=C sort -b -k 3 |
-        column -s$'\t' -t
+    LC_ALL=C sort -b -k 3 |
+    column -s$'\t' -t
 }
 
 function sagemaker-notebook-stop() {
@@ -410,14 +438,14 @@ function sagemaker-notebook-resize() {
 # S3
 function list-buckets() {
     gum spin --title "Fetching Buckets" -- aws s3api list-buckets \
-        --output text        \
-        --query "
+    --output text        \
+    --query "
       Buckets[].[
         Name,
         CreationDate
       ]"                |
-        grep -E -- "$filters" |
-        column -t
+    grep -E -- "$filters" |
+    column -t
 }
 
 function show-bucket-versioning() {
@@ -429,7 +457,7 @@ function enable-bucket-versioning() {
 }
 
 function bucket-policy() {
-  list-buckets | peco | awk '{ print $1 }' | xargs -I {} aws s3api get-bucket-policy --bucket {} | jq -r -c '.Policy' | jq .
+    list-buckets | peco | awk '{ print $1 }' | xargs -I {} aws s3api get-bucket-policy --bucket {} | jq -r -c '.Policy' | jq .
 }
 
 function edit-bucket-policy() {
@@ -442,23 +470,23 @@ bucket-add-tag() {
     name=$1
     value=$2
     local buckets=($(aws s3api list-buckets \
-                         --output text        \
-                         --query "
+            --output text        \
+            --query "
       Buckets[${buckets:+?contains(['${buckets// /"','"}'], Name)}].[
         Name,
         CreationDate
       ]"                |
-                         grep -E -- "$filters" |
-                         column -t | peco | awk '{ print $1 }' ))
+            grep -E -- "$filters" |
+            column -t | peco | awk '{ print $1 }' ))
     for element in "${buckets[@]}"; do
-        tempfile=$(mktemp)
-        echo $element
-        if aws s3api get-bucket-tagging --bucket "${element}" 2>&1 > /dev/null; then
-            aws s3api get-bucket-tagging --bucket "${element}" | jq -r --arg KEY "${name}" '.TagSet = [.TagSet[] | select(.Key != $KEY)]' | jq -r --arg KEY "$name" --arg VALUE "$value" '.TagSet[.TagSet | length] |= {"Key":$KEY, "Value":$VALUE}' > $tempfile
-        else
-            jq -r --arg KEY "$name" --arg VALUE "$value" '.TagSet = [{"Key":$KEY, "Value":$VALUE}]' <<<'{}' > $tempfile
-        fi
-        aws s3api put-bucket-tagging --bucket ${element} --tagging "file://${tempfile}"
+    tempfile=$(mktemp)
+    echo $element
+    if aws s3api get-bucket-tagging --bucket "${element}" 2>&1 > /dev/null; then
+    aws s3api get-bucket-tagging --bucket "${element}" | jq -r --arg KEY "${name}" '.TagSet = [.TagSet[] | select(.Key != $KEY)]' | jq -r --arg KEY "$name" --arg VALUE "$value" '.TagSet[.TagSet | length] |= {"Key":$KEY, "Value":$VALUE}' > $tempfile
+    else
+    jq -r --arg KEY "$name" --arg VALUE "$value" '.TagSet = [{"Key":$KEY, "Value":$VALUE}]' <<<'{}' > $tempfile
+    fi
+    aws s3api put-bucket-tagging --bucket ${element} --tagging "file://${tempfile}"
     done
 
 }
@@ -473,28 +501,58 @@ ssm-connect() {
 subnet-add-tag() {
     name=$1
     value=$2
-    subnets | peco | awk '{ print $1 }' | xargs -I {} aws ec2 create-tags --resources {} --tags Key=$1,Value=$2
+    subnets | peco | awk '{ print $1 }' | xargs -I {} aws ec2 create-tags --resources {} --tags Key=$1, Value=$2
+}
+
+# Add to transit gateway Route table
+
+function tgw-show-route-tables() {
+    aws ec2 describe-transit-gateway-route-tables --output text --query "TransitGatewayRouteTables[].[
+        TransitGatewayRouteTableId,
+        TransitGatewayId,
+        State,
+        Tags[?Key=='Name'].Value | [0]
+    ]" | column -t
+}
+
+function tgw-show-static-routes() {
+    tgwroute=$(tgw-show-route-tables | peco | awk '{ print $1 }')
+    aws ec2 search-transit-gateway-routes --transit-gateway-route-table-id ${tgwroute} --filters Name=type,Values=static \
+    | jq -r -c '.Routes[] | select(.TransitGatewayAttachments != null) | [.DestinationCidrBlock, .TransitGatewayAttachments[].TransitGatewayAttachmentId] | @tsv' | peco
+}
+
+function tgw-show-attachments() {
+    aws ec2 describe-transit-gateway-attachments |\
+     jq -r -c '.TransitGatewayAttachments[] | [.TransitGatewayAttachmentId, .ResourceType, .ResourceOwnerId, .ResourceRegion, .State, (.Tags[] | select(.Key == "Name") | .Value)] | @tsv' | peco
+}
+
+function tgw-add-static-route() {
+    tgwroute=$(tgw-show-route-tables | peco | awk '{ print $1 }')
+    tgwattach=$(tgw-show-attachments | peco | awk '{ print $1 }')
+    cidr=$(gum input --placeholder "CIDR")
+    echo aws ec2 create-transit-gateway-route --transit-gateway-route-table-id ${tgwroute} --destination-cidr-block ${cidr} --transit-gateway-attachment-id ${tgwattach}
+    aws ec2 create-transit-gateway-route --transit-gateway-route-table-id ${tgwroute} --destination-cidr-block ${cidr} --transit-gateway-attachment-id ${tgwattach}
 }
 
 cloudfront-add-ip() {
 
     local prefixlist=($(aws ec2 describe-managed-prefix-lists \
-                         --output text        \
-                         --query "
+            --output text        \
+            --query "
                                PrefixLists[].[
                                PrefixListName,
                                PrefixListId,
                                AddressFamily
                                              ]"                |
-                         grep -E -- "$filters" |
-                         column -t | peco | awk '{ print $2 }' ))
+            grep -E -- "$filters" |
+            column -t | peco | awk '{ print $2 }' ))
 
     local pversion=$(aws ec2 describe-managed-prefix-lists --prefix-list-ids ${prefixlist} | jq -c -r '.PrefixLists[0].Version')
     echo ${pversion}
 
     curl http://d7uri8nf7uskq.cloudfront.net/tools/list-cloudfront-ips | jq -r -c '.CLOUDFRONT_GLOBAL_IP_LIST[]' | peco | awk '{ print $1 }' | while read line; do
-        aws ec2 modify-managed-prefix-list --prefix-list-id ${prefixlist} --add-entries Cidr=${line} --current-version ${pversion}
-        pversion=$((pversion+1))
+    aws ec2 modify-managed-prefix-list --prefix-list-id ${prefixlist} --add-entries Cidr=${line} --current-version ${pversion}
+    pversion=$((pversion+1))
     done
 
 }

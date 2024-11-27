@@ -208,5 +208,5 @@ export PAGER=
 # bun
 export BUN_INSTALL="$HOME/.local/share/reflex/bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
-
+source /etc/profile.d/google-cloud-cli.sh
 
