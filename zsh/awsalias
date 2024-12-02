@@ -6,6 +6,16 @@ function account-id() {
 }
 
 # Certificate Manager
+
+function acm-list-certificates() {
+    aws acm list-certificates --output text --query "CertificateSummaryList[].[
+        CertificateArn,
+        DomainName,
+        Status,
+        Issuer
+    ]" | column -t
+}
+
 function acm-import-cert() {
     local certfile=$(gum file)
     local key=$(gum file)
@@ -218,6 +228,27 @@ function volumes() {
         ]" |
     sort -k 1 |
     column -s$'\t' -t
+}
+
+function albs() {
+    aws elbv2 describe-load-balancers \
+    --output text \
+    --query "
+        LoadBalancers[].[
+          LoadBalancerName,
+          DNSName,
+          Scheme,
+          Type,
+          LoadBalancerArn
+        ]" |
+    sort -k 1 |
+    column -s$'\t' -t
+}
+
+function alb-update-certificate() {
+    certarn=$(acm-list-certificates | peco | awk '{ print $1 }')
+    alb=$(albs | peco | awk '{ print $5 }')
+    aws elbv2 add-listener-certificates --listener-arn $(aws elbv2 describe-listeners --load-balancer-arn ${alb} --output text --query "Listeners[].ListenerArn") --certificates CertificateArn=${certarn}
 }
 
 function volume-add-tag() {

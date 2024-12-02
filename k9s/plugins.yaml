@@ -1,0 +1,73 @@
+plugins:
+
+  generate-existing-clusterpolicy:
+    # Define a mnemonic to invoke the plugin
+    shortCut: Shift-E
+    confirm: true
+    # What will be shown on the K9s menu
+    description: generate-existing-kyverno-clusterpolicy
+    # Collections of views that support this shortcut. (You can use `all`)
+    scopes:
+    - clusterpolicies
+    # The command to run upon invocation. Can use Krew plugins here too!
+    command: kubectl
+    # Whether or not to run the command in background mode
+    background: false
+    # Defines the command arguments
+    args:
+    - patch
+    - $RESOURCE_NAME.$RESOURCE_GROUP
+    - $NAME
+    - --type
+    - merge
+    - --patch
+    - '{"spec": {"generateExisting": true}}'
+    - --context
+    - $CONTEXT
+
+  remove_finalizers:
+    shortCut: Shift-F
+    confirm: true
+    dangerous: true
+    scopes:
+      - all
+    description: |
+      Removes all finalizers from selected resource. Be careful when using it,
+      it may leave dangling resources or delete them
+    command: kubectl
+    background: true
+    args:
+      - patch
+      - --context
+      - $CONTEXT
+      - --namespace
+      - $NAMESPACE
+      - $RESOURCE_NAME.$RESOURCE_GROUP
+      - $NAME
+      - -p
+      - '{"metadata":{"finalizers":null}}'
+      - --type
+      - merge
+  dive:
+    shortCut: Shift-I
+    confirm: false
+    description: "Dive image"
+    scopes:
+      - containers
+    command: dive
+    background: false
+    args:
+      - $COL-IMAGE
+
+  debug:
+    shortCut: Shift-D
+    description: Add debug container
+    dangerous: true
+    scopes:
+      - containers
+    command: bash
+    background: false
+    confirm: true
+    args:
+      - -c
+      - "kubectl --kubeconfig=$KUBECONFIG debug -it --context $CONTEXT -n=$NAMESPACE $POD --target=$NAME --image=nicolaka/netshoot:v0.13 --share-processes -- bash"
