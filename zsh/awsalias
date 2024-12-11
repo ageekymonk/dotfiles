@@ -39,7 +39,9 @@ function datasync-tasks-running() {
 function datasync-task-executions-failed() {
     aws datasync list-task-executions --query "TaskExecutions[?Status=='ERROR']"
 }
-# SCP
+
+
+# organizations
 
 function list-org-root() {
     aws organizations list-roots | jq -r -c '.Roots[] | [.Id, .Name] | @tsv' | awk '{ print $1 }'
@@ -77,14 +79,14 @@ function show-permission-sets-inline-policy() {
     instance_store_id=$(bkt --ttl=1y -- aws sso-admin list-instances --query "Instances[0].IdentityStoreId")
     instance_store_arn=$(bkt --ttl=1y -- aws sso-admin list-instances | jq -r -c '.Instances[0].InstanceArn')
     permission_set=$(list-permission-sets | peco | awk '{ print $2 }')
-    aws sso-admin get-inline-policy-for-permission-set --instance-arn ${instance_store_arn} --permission-set-arn ${permission_set} | jq -r -c '.InlinePolicy' | python -m json.tool | EDITOR="cursor -w" vipe | python -m json.tool
+    aws sso-admin get-inline-policy-for-permission-set --instance-arn ${instance_store_arn} --permission-set-arn ${permission_set} | jq -r -c '.InlinePolicy' | python -m json.tool | EDITOR="code -w" vipe | python -m json.tool
 }
 
 function edit-permission-sets-inline-policy() {
     instance_store_id=$(bkt --ttl=1y -- aws sso-admin list-instances --query "Instances[0].IdentityStoreId")
     instance_store_arn=$(bkt --ttl=1y -- aws sso-admin list-instances | jq -r -c '.Instances[0].InstanceArn')
     permission_set=$(list-permission-sets | peco | awk '{ print $2 }')
-    policy=$( aws sso-admin get-inline-policy-for-permission-set --instance-arn ${instance_store_arn} --permission-set-arn ${permission_set} | jq -r -c '.InlinePolicy' | python -m json.tool | EDITOR="cursor -w" vipe | jq -r -c .)
+    policy=$( aws sso-admin get-inline-policy-for-permission-set --instance-arn ${instance_store_arn} --permission-set-arn ${permission_set} | jq -r -c '.InlinePolicy' | python -m json.tool | EDITOR="code -w" vipe | jq -r -c .)
     aws sso-admin put-inline-policy-to-permission-set --instance-arn ${instance_store_arn} --permission-set-arn ${permission_set} --inline-policy ${policy}
     aws sso-admin provision-permission-set --instance-arn ${instance_store_arn} --permission-set-arn ${permission_set} --target-type ALL_PROVISIONED_ACCOUNTS
 }
@@ -331,6 +333,18 @@ function efs-recovery-points() {
 }
 
 # IAM
+function list-iam-policy() {
+    gum spin --title "Fetching IAM Policies" -- aws iam list-policies \
+    --output text       \
+    --query '
+      Policies[].[
+        PolicyName,
+        Arn
+    ]'                  |
+    LC_ALL=C sort -b -k 1 |
+    column -s$'\t' -t
+}
+
 function list-iam-roles() {
     gum spin --title "Fetching IAM Roles" -- aws iam list-roles \
     --output text       \
@@ -354,21 +368,27 @@ function edit-iam-role-inline-policy() {
     aws iam put-role-policy --role-name ${rolename} --policy-name ${inline_policy} --policy-document ${policy}
 }
 
+function edit-iam-policy() {
+    policyarn=$(list-iam-policy | peco | awk '{ print $2 }')
+    policy=$(aws iam get-policy --policy-arn ${policyarn} | jq -r -c '.Policy.DefaultVersionId' | xargs -I {} aws iam get-policy-version --policy-arn ${policyarn} --version-id {} | jq -r -c '.PolicyVersion.Document' | python -m json.tool | EDITOR="code -w" vipe | jq -r -c .)
+    aws iam create-policy-version --policy-arn ${policyarn} --policy-document ${policy} --set-as-default
+}
+
 function clone-iam-role() {
     rolename=$(list-iam-roles | peco --select-1 | awk '{ print $1 }')
     newrolename=$(gum input --placeholder "New Role Name")
     aws iam create-role --role-name ${newrolename} --assume-role-policy-document $(get-iam-role-trust-policy)
     while read policyname; 
     do 
-        policydocument=$(aws iam get-role-policy --role-name ${rolename} --policy-name ${policyname} | jq -r -c '.PolicyDocument'); 
-        aws iam put-role-policy --role-name ${newrolename} --policy-name ${policyname} --policy-document ${policydocument}
+    policydocument=$(aws iam get-role-policy --role-name ${rolename} --policy-name ${policyname} | jq -r -c '.PolicyDocument'); 
+    aws iam put-role-policy --role-name ${newrolename} --policy-name ${policyname} --policy-document ${policydocument}
     
     done < <(aws iam list-role-policies --role-name ${rolename} | jq -r -c '.PolicyNames[]')
 
 
     while read attachedpolicy;
     do
-        aws iam attach-role-policy --role-name ${newrolename} --policy-arn ${attachedpolicy}
+    aws iam attach-role-policy --role-name ${newrolename} --policy-arn ${attachedpolicy}
     done < <(aws iam list-attached-role-policies --role-name ${rolename} | jq -r -c '.AttachedPolicies[].PolicyArn')
 }
 
@@ -409,6 +429,25 @@ function iam-instance-profiles() {
 
 function delete-instance-profiles() {
     iam-instance-profiles | peco | awk '{ print $1 }' | xargs -I {} aws iam delete-instance-profile --instance-profile-name {}
+}
+
+# kms
+function list-kms-keys() {
+    aws kms list-aliases \
+    --output text       \
+    --query '
+      Aliases[].[
+        AliasName,
+        TargetKeyId
+    ]'                  |
+    LC_ALL=C sort -b -k 1 |
+    column -s$'\t' -t
+}
+
+function edit-kms-key-policy() {
+    keyid=$(list-kms-keys | peco | awk '{ print $2 }')
+    policy=$(aws kms get-key-policy --key-id ${keyid} --policy-name default | jq -r -c '.Policy' | python -m json.tool | EDITOR="code -w" vipe | jq -r -c .)
+    aws kms put-key-policy --key-id ${keyid} --policy-name default --policy ${policy}
 }
 
 # RDS
@@ -548,13 +587,13 @@ function tgw-show-route-tables() {
 
 function tgw-show-static-routes() {
     tgwroute=$(tgw-show-route-tables | peco | awk '{ print $1 }')
-    aws ec2 search-transit-gateway-routes --transit-gateway-route-table-id ${tgwroute} --filters Name=type,Values=static \
+    aws ec2 search-transit-gateway-routes --transit-gateway-route-table-id ${tgwroute} --filters Name=type, Values=static \
     | jq -r -c '.Routes[] | select(.TransitGatewayAttachments != null) | [.DestinationCidrBlock, .TransitGatewayAttachments[].TransitGatewayAttachmentId] | @tsv' | peco
 }
 
 function tgw-show-attachments() {
-    aws ec2 describe-transit-gateway-attachments |\
-     jq -r -c '.TransitGatewayAttachments[] | [.TransitGatewayAttachmentId, .ResourceType, .ResourceOwnerId, .ResourceRegion, .State, (.Tags[] | select(.Key == "Name") | .Value)] | @tsv' | peco
+    aws ec2 describe-transit-gateway-attachments | \
+    jq -r -c '.TransitGatewayAttachments[] | [.TransitGatewayAttachmentId, .ResourceType, .ResourceOwnerId, .ResourceRegion, .State, (.Tags[] | select(.Key == "Name") | .Value)] | @tsv' | peco
 }
 
 function tgw-add-static-route() {
