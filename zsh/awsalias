@@ -505,6 +505,51 @@ function sagemaker-notebook-resize() {
     sagemaker-notebooks | peco | awk '{ print $1 }' | xargs -I {} aws sagemaker update-notebook-instance --notebook-instance-name {} --instance-type ${instance_size}
 }
 
+# SNS
+function list-topics() {
+    gum spin --title "Fetching Topics" -- aws sns list-topics \
+    --output text       \
+    --query '
+      Topics[].[
+        TopicArn
+    ]'                  |
+    LC_ALL=C sort -b -k 1 |
+    column -s$'\t' -t
+}
+
+function list-subscriptions-for-topics() {
+    list-topics | peco | awk '{ print $1 }' | xargs -I {} aws sns list-subscriptions-by-topic --topic-arn {}
+}
+
+function list-subscriptions() {
+    gum spin --title "Fetching Subscriptions" -- aws sns list-subscriptions \
+    --output text       \
+    --query '
+      Subscriptions[].[
+        SubscriptionArn,
+        Protocol,
+        Endpoint
+    ]'                  |
+    LC_ALL=C sort -b -k 1 |
+    column -s$'\t' -t
+}
+
+function add-email-subscription() {
+    email=$(gum input --placeholder "Email")
+    list-topics | peco | awk '{ print $1 }' | xargs -I {} aws sns subscribe --topic-arn {} --protocol email --notification-endpoint ${email}
+}
+
+function confirm-subscription() {
+    confirmlink=$(gum input --char-limit 4000 --placeholder "Confirmation Link")
+    token=$(echo $confirmlink | python3 -c "import sys; from urllib.parse import unquote; print(unquote(sys.stdin.read()).split('&')[1].split('=')[-1]);")
+    echo $token
+    list-topics | peco | awk '{ print $1 }' | xargs -I {} aws sns confirm-subscription --topic-arn {} --token ${token}
+}
+
+function delete-subscriptions() {
+    list-subscriptions | peco | awk '{ print $1 }' | xargs -I {} aws sns unsubscribe --subscription-arn {}
+}
+
 # S3
 function list-buckets() {
     gum spin --title "Fetching Buckets" -- aws s3api list-buckets \
