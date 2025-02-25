@@ -40,6 +40,17 @@ function datasync-task-executions-failed() {
     aws datasync list-task-executions --query "TaskExecutions[?Status=='ERROR']"
 }
 
+# elasticbeanstalk
+functtion ebs-environments() {
+    aws elasticbeanstalk describe-environments --query "Environments[].[EnvironmentName, Status, Health, SolutionStackName, DateCreated, DateUpdated]" | jq -r -c '.[] | [.[]] | @tsv'
+}
+
+function update-ebs-certs() {
+    cert=$(acm-list-certificates | peco | awk '{ print $1 }')
+    envname=$(ebs-environments | peco | awk '{ print $1 }')
+    aws elasticbeanstalk update-environment --environment-name ${envname} --option-settings "Namespace=aws:elb:listener:443,OptionName=SSLCertificateId,Value=${cert}"
+}
+
 
 # organizations
 
@@ -56,15 +67,19 @@ function list-scps() {
 }
 
 function detach-scp() {
-    scp=$(list-scps)
-    root=$(list-ous)
-    aws organizations detach-policy --policy-id ${scp} --target-id ${root}
+    local scp=${1:-$(list-scps)}
+    local roots=($(list-ous))
+    for root in "${roots[@]}"; do
+        aws organizations detach-policy --policy-id ${scp} --target-id ${root}
+    done
 }
 
 function attach-scp() {
     scp=$(list-scps)
-    root=$(list-ous)
-    aws organizations attach-policy --policy-id ${scp} --target-id ${root}
+    local roots=($(list-ous))
+    for root in "${roots[@]}"; do
+        aws organizations attach-policy --policy-id ${scp} --target-id ${root}
+    done
 }
 
 function list-permission-sets() {
@@ -150,6 +165,10 @@ function create-stack() {
     fname=$(gum file)
     stackname=$(gum input --placeholder "Stack Name")
     aws cloudformation create-stack --stack-name ${stackname} --template-body file://${fname} --capabilities CAPABILITY_NAMED_IAM
+}
+
+function delete-stack() {
+    list-stacks | peco | awk '{ print $1 }' | xargs -I {} aws cloudformation delete-stack --stack-name {}
 }
 
 function get-stack-details() {
@@ -346,19 +365,37 @@ function list-iam-policy() {
 }
 
 function list-iam-roles() {
-    gum spin --title "Fetching IAM Roles" -- aws iam list-roles \
-    --output text       \
-    --query '
-      Roles[].[
-        RoleName,
-        Arn
-    ]'                  |
-    LC_ALL=C sort -b -k 1 |
-    column -s$'\t' -t
+    local profile=${1}
+    if [ -n "$profile" ]; then
+        gum spin --title "Fetching IAM Roles" -- aws iam list-roles --profile ${profile} \
+        --output text       \
+        --query '
+          Roles[].[
+            RoleName,
+            Arn
+        ]'                  |
+        LC_ALL=C sort -b -k 1 |
+        column -s$'\t' -t
+    else
+        gum spin --title "Fetching IAM Roles" -- aws iam list-roles \
+        --output text       \
+        --query '
+          Roles[].[
+            RoleName,
+            Arn
+        ]'                  |
+        LC_ALL=C sort -b -k 1 |
+        column -s$'\t' -t
+    fi
 }
 
 function get-iam-role-trust-policy() {
-    list-iam-roles | peco | awk '{ print $1 }' | xargs -I {} aws iam get-role --role-name {} | jq -r -c '.Role.AssumeRolePolicyDocument'
+    local profile=${1}
+    if [ -n "$profile" ]; then
+        list-iam-roles ${profile} | peco | awk '{ print $1 }' | xargs -I {} aws iam get-role --role-name {} --profile ${profile} | jq -r -c '.Role.AssumeRolePolicyDocument'
+    else
+        list-iam-roles | peco | awk '{ print $1 }' | xargs -I {} aws iam get-role --role-name {} | jq -r -c '.Role.AssumeRolePolicyDocument'
+    fi
 }
 
 function edit-iam-role-inline-policy() {
@@ -390,6 +427,28 @@ function clone-iam-role() {
     do
     aws iam attach-role-policy --role-name ${newrolename} --policy-arn ${attachedpolicy}
     done < <(aws iam list-attached-role-policies --role-name ${rolename} | jq -r -c '.AttachedPolicies[].PolicyArn')
+}
+
+function clone-iam-role-cross-account() {
+    src_account=$(gum input --placeholder "Input profile")
+    dest_account=$(gum input --placeholder "Output profile")
+    rolename=$(list-iam-roles ${src_account} | peco --select-1 | awk '{ print $1 }')
+    newrolename=$(gum input --placeholder "New Role Name")
+    echo $rolename
+    echo $newrolename
+    aws iam create-role --role-name ${newrolename} --assume-role-policy-document $(get-iam-role-trust-policy ${src_account}) --profile ${dest_account}
+    while read policyname; 
+    do 
+    policydocument=$(aws iam get-role-policy --role-name ${rolename} --policy-name ${policyname} --profile ${src_account} | jq -r -c '.PolicyDocument'); 
+    aws iam put-role-policy --role-name ${newrolename} --policy-name ${policyname} --policy-document ${policydocument} --profile ${dest_account}
+    
+    done < <(aws iam list-role-policies --role-name ${rolename} --profile ${src_account} | jq -r -c '.PolicyNames[]')
+
+
+    while read attachedpolicy;
+    do
+    aws iam attach-role-policy --role-name ${newrolename} --policy-arn ${attachedpolicy} --profile ${dest_account}
+    done < <(aws iam list-attached-role-policies --role-name ${rolename} --profile ${src_account} | jq -r -c '.AttachedPolicies[].PolicyArn')
 }
 
 function edit-iam-role-trust-policy() {
