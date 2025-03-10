@@ -1,5 +1,5 @@
-hosts=($(grep "Host \+[^*]" ~/.ssh/config | cut -d' ' -f 2 | sort -u))
-zstyle ':completion:*' hosts $hosts
+# hosts=($(grep "Host \+[^*]" ~/.ssh/config | cut -d' ' -f 2 | sort -u))
+# zstyle ':completion:*' hosts $hosts
 if [[ "$(uname)" == "Linux" ]]
 then
   export PATH="/snap/bin:$PATH"

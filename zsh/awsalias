@@ -85,9 +85,9 @@ function attach-scp() {
 function list-permission-sets() {
     instance_store_id=$(bkt --ttl=1y -- aws sso-admin list-instances --query "Instances[0].IdentityStoreId")
     instance_store_arn=$(bkt --ttl=1y -- aws sso-admin list-instances | jq -r -c '.Instances[0].InstanceArn')
-    permission_sets=$(bkt --ttl=1w -- aws sso-admin list-permission-sets --instance-arn ${instance_store_arn}) 
+    permission_sets=$(bkt --ttl=1d -- aws sso-admin list-permission-sets --instance-arn ${instance_store_arn}) 
     echo ${permission_sets} | jq -r -c '.PermissionSets[]' | \
-    xargs -I {} bkt --ttl=1w -- aws sso-admin describe-permission-set --instance-arn ${instance_store_arn} --permission-set-arn {} | jq -r -c '.PermissionSet | [.Name, .PermissionSetArn] | @tsv'
+    xargs -I {} bkt --ttl=1d -- aws sso-admin describe-permission-set --instance-arn ${instance_store_arn} --permission-set-arn {} | jq -r -c '.PermissionSet | [.Name, .PermissionSetArn] | @tsv'
 }
 
 function show-permission-sets-inline-policy() {
@@ -150,6 +150,19 @@ function update-stackset() {
     if [ -n "$fname" ]; then
     list-stacksets | peco | awk '{ print $1 }' | xargs -I {} aws cloudformation update-stack-set --stack-set-name {} --template-body file://${fname} --capabilities CAPABILITY_NAMED_IAM
     fi
+}
+
+function delete-stack-from-stackset() {
+    stackset=$(list-stacksets | peco | awk '{ print $1 }')
+    instances=$(get-stackset-instances | peco | awk '{ print $1 }' | paste -sd ' ')
+    region=$(gum input --placeholder "Region")
+    echo "Verify and run the following command"
+    echo aws cloudformation delete-stack-instances --stack-set-name ${stackset} --accounts ${instances} --regions ${region} --no-retain-stacks
+}
+
+function delete-stackset() {
+    stackset=$(list-stacksets | peco | awk '{ print $1 }')
+    aws cloudformation delete-stack-set --stack-set-name ${stackset}
 }
 
 function get-stackset-instances() {

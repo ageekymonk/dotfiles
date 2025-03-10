@@ -14,11 +14,11 @@
   postBuffer = 524288000
   cookiefile = ~/.gitcookies
 
-[commit]
-  gpgsign = true
+# [commit]
+#   gpgsign = true
 
-[gpg]
-  format = ssh
+# [gpg]
+#   format = ssh
 
 [include]
   path = alias.gitconfig
@@ -158,7 +158,7 @@
   diffFilter = diff-highlight
 
 [credential]
-	helper = manager-core
+	helper = store
   
 [credential "https://dev.azure.com"]
 	useHttpPath = false

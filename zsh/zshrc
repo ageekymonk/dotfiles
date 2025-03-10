@@ -5,13 +5,13 @@ export LANG=en_AU.UTF-8
 if [[ "$(uname)" == "Darwin" ]]
 then
     USERNAME=`whoami`
-    export ZSH=/Users/$USERNAME/.oh-my-zsh
+    # export ZSH=/Users/$USERNAME/.oh-my-zsh
     # Would you like to use another custom folder than $ZSH/custom?
     ZSH_CONFIG_FILE=`greadlink -f ~/.zshrc`
     ZSH_CONFIG_DIR=`dirname $ZSH_CONFIG_FILE`
     ZSH_CUSTOM=$ZSH_CONFIG_DIR
     source /Users/$USERNAME/.iterm2_shell_integration.zsh
-    source $HOMEBREW_PREFIX/opt/zinit/zinit.zsh
+    # source $HOMEBREW_PREFIX/opt/zinit/zinit.zsh
     . $HOMEBREW_PREFIX/opt/asdf/libexec/asdf.sh
     . $HOMEBREW_PREFIX/etc/profile.d/z.sh
     export AWS_VAULT_BACKEND=keychain
@@ -19,71 +19,76 @@ then
 elif [[ "$(uname)" == "Linux" ]]
 then
     USERNAME=`whoami`
-    export ZSH=/home/$USERNAME/.oh-my-zsh
+    # export ZSH=/home/$USERNAME/.oh-my-zsh
     # Would you like to use another custom folder than $ZSH/custom?
     ZSH_CONFIG_FILE=`readlink -f ~/.zshrc`
     ZSH_CONFIG_DIR=`dirname $ZSH_CONFIG_FILE`
     ZSH_CUSTOM=$ZSH_CONFIG_DIR
     export SHELL=/bin/zsh
-    if [[ ! -f $HOME/.zinit/bin/zinit.zsh ]]; then
-        print -P "%F{33}▓▒░ %F{220}Installing DHARMA Initiative Plugin Manager (zdharma/zinit)…%f"
-        command mkdir -p "$HOME/.zinit" && command chmod g-rwX "$HOME/.zinit"
-        command git clone https://github.com/zdharma/zinit "$HOME/.zinit/bin" && \
-            print -P "%F{33}▓▒░ %F{34}Installation successful.%f" || \
-            print -P "%F{160}▓▒░ The clone has failed.%f"
-    fi
-    source "$HOME/.zinit/bin/zinit.zsh"
+    # if [[ ! -f $HOME/.zinit/bin/zinit.zsh ]]; then
+    #     print -P "%F{33}▓▒░ %F{220}Installing DHARMA Initiative Plugin Manager (zdharma/zinit)…%f"
+    #     command mkdir -p "$HOME/.zinit" && command chmod g-rwX "$HOME/.zinit"
+    #     command git clone https://github.com/zdharma/zinit "$HOME/.zinit/bin" && \
+    #         print -P "%F{33}▓▒░ %F{34}Installation successful.%f" || \
+    #         print -P "%F{160}▓▒░ The clone has failed.%f"
+    # fi
+    # source "$HOME/.zinit/bin/zinit.zsh"
     . $HOME/.asdf/asdf.sh
     source /usr/share/z/z.sh
     export AWS_VAULT_BACKEND=pass
 fi
 
 # Oh My ZSH Configuration
-CASE_SENSITIVE="true"
-UPDATE_ZSH_DAYS=15
-ENABLE_CORRECTION="false"
-COMPLETION_WAITING_DOTS="true"
-DISABLE_UNTRACKED_FILES_DIRTY="true"
-HIST_STAMPS="mm/dd/yyyy"
+# CASE_SENSITIVE="true"
+# UPDATE_ZSH_DAYS=15
+# ENABLE_CORRECTION="false"
+# COMPLETION_WAITING_DOTS="true"
+# DISABLE_UNTRACKED_FILES_DIRTY="true"
+# HIST_STAMPS="mm/dd/yyyy"
 
-autoload -Uz _zinit
-(( ${+_comps} )) && _comps[zinit]=_zinit
+autoload -Uz bashcompinit
+bashcompinit
+
+autoload -Uz compinit
+compinit
+
+# (( ${+_comps} )) && _comps[zinit]=_zinit
 ### End of Zinit installer's chunk
 
 DEFAULT_USER=${USER}
 
-source $ZSH/oh-my-zsh.sh
+# source $ZSH/oh-my-zsh.sh
 
-zstyle ':completion:*:*:docker:*' option-stacking yes
-zstyle ':completion:*:*:docker-*:*' option-stacking yes
+# zstyle ':completion:*:*:docker:*' option-stacking yes
+# zstyle ':completion:*:*:docker-*:*' option-stacking yes
 
-zinit snippet OMZ::plugins/git/git.plugin.zsh
+# zinit snippet OMZ::plugins/git/git.plugin.zsh
 # zinit snippet OMZ::plugins/docker/_docker
 
 
-zinit snippet https://raw.githubusercontent.com/ageekymonk/kubectl-aliases/master/.kubectl_aliases
+# zinit snippet https://raw.githubusercontent.com/ageekymonk/kubectl-aliases/master/.kubectl_aliases
 
-zinit load zsh-users/zsh-autosuggestions
-zinit load zsh-users/zsh-history-substring-search
-zinit load zsh-users/zsh-completions
-zinit load zsh-users/zsh-syntax-highlighting
-zinit load wfxr/forgit
+# zinit load zsh-users/zsh-autosuggestions
+# zinit load zsh-users/zsh-history-substring-search
+# zinit load zsh-users/zsh-completions
+# zinit load zsh-users/zsh-syntax-highlighting
+# zinit load wfxr/forgit
 
-zinit as"program" make'!' atclone'./direnv hook zsh > zhook.zsh' \
-      atpull'%atclone' pick"direnv" src"zhook.zsh" for \
-      direnv/direnv
+# zinit as"program" make'!' atclone'./direnv hook zsh > zhook.zsh' \
+#       atpull'%atclone' pick"direnv" src"zhook.zsh" for \
+#       direnv/direnv
 
 
-zinit wait lucid for \
-      hlissner/zsh-autopair
+# zinit wait lucid for \
+#       hlissner/zsh-autopair
 
-zinit light-mode lucid wait has"kubectl" for \
-      id-as"kubectl_completion" \
-      as"completion" \
-      atclone"kubectl completion zsh > _kubectl" \
-      atpull"%atclone" \
-      run-atpull \
-      zdharma-continuum/null
+# zinit light-mode lucid wait has"kubectl" for \
+#       id-as"kubectl_completion" \
+#       as"completion" \
+#       atclone"kubectl completion zsh > _kubectl" \
+#       atpull"%atclone" \
+#       run-atpull \
+#       zdharma-continuum/null
 
 # User configuration
 
@@ -103,16 +108,22 @@ setopt HIST_IGNORE_SPACE
 setopt HIST_FIND_NO_DUPS
 setopt HIST_SAVE_NO_DUPS
 setopt HIST_BEEP
+setopt autocd
+
+HISTSIZE=1000000
+SAVEHIST=1000000
+HISTFILE=~/.zsh_history
+
 
 # Configure virtualenv and pyenv
-if which pyenv > /dev/null;
-then
-    eval "$(pyenv init -)";
-fi
+# if which pyenv > /dev/null;
+# then
+#     eval "$(pyenv init -)";
+# fi
 
-if which pyenv-virtualenv-init > /dev/null; then
-    eval "$(pyenv virtualenv-init -)";
-fi
+# if which pyenv-virtualenv-init > /dev/null; then
+#     eval "$(pyenv virtualenv-init -)";
+# fi
 
 # fzf
 
@@ -201,6 +212,7 @@ export REDO_HISTORY_PATH=~/.zsh_history
 # bindkey -s '^q' 'redo^M'
 # This is for aws cli
 export PAGER=
+# export PYENV_VIRTUALENV_DISABLE_PROMPT=1
 
 # bun completions
 [ -s "/home/ramz/.local/share/reflex/bun/_bun" ] && source "/home/ramz/.local/share/reflex/bun/_bun"
