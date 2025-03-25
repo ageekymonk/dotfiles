@@ -70,7 +70,7 @@ function detach-scp() {
     local scp=${1:-$(list-scps)}
     local roots=($(list-ous))
     for root in "${roots[@]}"; do
-        aws organizations detach-policy --policy-id ${scp} --target-id ${root}
+    aws organizations detach-policy --policy-id ${scp} --target-id ${root}
     done
 }
 
@@ -78,7 +78,7 @@ function attach-scp() {
     scp=$(list-scps)
     local roots=($(list-ous))
     for root in "${roots[@]}"; do
-        aws organizations attach-policy --policy-id ${scp} --target-id ${root}
+    aws organizations attach-policy --policy-id ${scp} --target-id ${root}
     done
 }
 
@@ -380,34 +380,34 @@ function list-iam-policy() {
 function list-iam-roles() {
     local profile=${1}
     if [ -n "$profile" ]; then
-        gum spin --title "Fetching IAM Roles" -- aws iam list-roles --profile ${profile} \
-        --output text       \
-        --query '
+    gum spin --title "Fetching IAM Roles" -- aws iam list-roles --profile ${profile} \
+    --output text       \
+    --query '
           Roles[].[
             RoleName,
             Arn
         ]'                  |
-        LC_ALL=C sort -b -k 1 |
-        column -s$'\t' -t
+    LC_ALL=C sort -b -k 1 |
+    column -s$'\t' -t
     else
-        gum spin --title "Fetching IAM Roles" -- aws iam list-roles \
-        --output text       \
-        --query '
+    gum spin --title "Fetching IAM Roles" -- aws iam list-roles \
+    --output text       \
+    --query '
           Roles[].[
             RoleName,
             Arn
         ]'                  |
-        LC_ALL=C sort -b -k 1 |
-        column -s$'\t' -t
+    LC_ALL=C sort -b -k 1 |
+    column -s$'\t' -t
     fi
 }
 
 function get-iam-role-trust-policy() {
     local profile=${1}
     if [ -n "$profile" ]; then
-        list-iam-roles ${profile} | peco | awk '{ print $1 }' | xargs -I {} aws iam get-role --role-name {} --profile ${profile} | jq -r -c '.Role.AssumeRolePolicyDocument'
+    list-iam-roles ${profile} | peco | awk '{ print $1 }' | xargs -I {} aws iam get-role --role-name {} --profile ${profile} | jq -r -c '.Role.AssumeRolePolicyDocument'
     else
-        list-iam-roles | peco | awk '{ print $1 }' | xargs -I {} aws iam get-role --role-name {} | jq -r -c '.Role.AssumeRolePolicyDocument'
+    list-iam-roles | peco | awk '{ print $1 }' | xargs -I {} aws iam get-role --role-name {} | jq -r -c '.Role.AssumeRolePolicyDocument'
     fi
 }
 
@@ -742,4 +742,76 @@ cloudfront-add-ip() {
     pversion=$((pversion+1))
     done
 
+}
+
+# security group
+function list-sg() {
+    local profile=${1}
+    if [ -n "$profile" ]; then
+        aws ec2 describe-security-groups --profile ${profile} --output text --query "SecurityGroups[].[
+            GroupId,
+            GroupName, 
+            Description
+        ]" | column -t
+    else
+        aws ec2 describe-security-groups --output text --query "SecurityGroups[].[
+            GroupId,
+            GroupName,
+            Description
+        ]" | column -t
+    fi
+}
+
+function list-vpc() {
+    local profile=${1}
+    if [ -n "$profile" ]; then
+    aws ec2 describe-vpcs --profile ${profile} --output text --query "Vpcs[].[
+            VpcId,
+            CidrBlock,
+            IsDefault
+        ]" | column -t
+    else
+    aws ec2 describe-vpcs --output text --query "Vpcs[].[
+            VpcId, 
+            CidrBlock,
+            IsDefault
+        ]" | column -t
+    fi
+}
+
+function copy-sg-cross-account() {
+
+    src_account=$(gum input --placeholder "Input profile")
+    dest_account=$(gum input --placeholder "Output profile")
+    src_region=$(gum input --placeholder "Source region")
+    dest_region=$(gum input --placeholder "Destination region") 
+    
+    # Get source security group info using source profile and region
+    sgid=$(AWS_DEFAULT_REGION=${src_region} aws ec2 describe-security-groups --profile ${src_account} --output text --query "SecurityGroups[].[GroupId,GroupName,Description]" | column -t | peco | awk '{print $1}')
+    
+    sgname=$(AWS_DEFAULT_REGION=${src_region} aws ec2 describe-security-groups --group-ids ${sgid} --profile ${src_account} | jq -r '.SecurityGroups[].GroupName')
+    sgdesc=$(AWS_DEFAULT_REGION=${src_region} aws ec2 describe-security-groups --group-ids ${sgid} --profile ${src_account} | jq -r '.SecurityGroups[].Description')
+
+    sourcevpc=$(AWS_DEFAULT_REGION=${src_region} aws ec2 describe-security-groups --group-ids ${sgid} --profile ${src_account} | jq -r -c '.SecurityGroups[].VpcId')
+    destvpc=$(AWS_DEFAULT_REGION=${dest_region} list-vpc ${dest_account} | peco | awk '{ print $1 }')
+    
+    # Check if security group exists in destination account/region
+    if ! destsgid=$(AWS_DEFAULT_REGION=${dest_region} aws ec2 describe-security-groups --group-names ${sgname} --profile ${dest_account} 2>/dev/null | jq -r '.SecurityGroups[].GroupId'); then
+        # Create security group if it doesn't exist
+        destsgid=$(AWS_DEFAULT_REGION=${dest_region} aws ec2 create-security-group --group-name ${sgname} --description "${sgdesc}" --vpc-id ${destvpc} --profile ${dest_account} --output text --query 'GroupId')
+    fi
+
+    # destsgid=$(AWS_DEFAULT_REGION=${dest_region} list-sg ${dest_account} | peco | awk '{ print $1 }')
+
+    # Copy ingress rules
+    while read ingressrule;
+    do
+    AWS_DEFAULT_REGION=${dest_region} aws ec2 authorize-security-group-ingress --group-id ${destsgid} --profile ${dest_account} --ip-permissions "${ingressrule}"
+    done < <(AWS_DEFAULT_REGION=${src_region} aws ec2 describe-security-groups --group-ids ${sgid} --profile ${src_account} | jq -r -c '.SecurityGroups[].IpPermissions[]')
+    
+    # Copy egress rules  
+    while read egressrule;
+    do
+    AWS_DEFAULT_REGION=${dest_region} aws ec2 authorize-security-group-egress --group-id ${destsgid} --profile ${dest_account} --ip-permissions "${egressrule}"
+    done < <(AWS_DEFAULT_REGION=${src_region} aws ec2 describe-security-groups --group-ids ${sgid} --profile ${src_account} | jq -r -c '.SecurityGroups[].IpPermissionsEgress[]')
 }

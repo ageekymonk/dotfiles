@@ -1,0 +1,5 @@
+launcher = [ "tofi", "--fuzzy-match=true", "--prompt-text=clap: " ]
+# launcher = ["rofi", "-dmenu"]
+history_size = 50
+
+[favorites]

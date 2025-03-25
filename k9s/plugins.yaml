@@ -1,5 +1,4 @@
 plugins:
-
   generate-existing-clusterpolicy:
     # Define a mnemonic to invoke the plugin
     shortCut: Shift-E
@@ -8,22 +7,22 @@ plugins:
     description: generate-existing-kyverno-clusterpolicy
     # Collections of views that support this shortcut. (You can use `all`)
     scopes:
-    - clusterpolicies
+      - clusterpolicies
     # The command to run upon invocation. Can use Krew plugins here too!
     command: kubectl
     # Whether or not to run the command in background mode
     background: false
     # Defines the command arguments
     args:
-    - patch
-    - $RESOURCE_NAME.$RESOURCE_GROUP
-    - $NAME
-    - --type
-    - merge
-    - --patch
-    - '{"spec": {"generateExisting": true}}'
-    - --context
-    - $CONTEXT
+      - patch
+      - $RESOURCE_NAME.$RESOURCE_GROUP
+      - $NAME
+      - --type
+      - merge
+      - --patch
+      - '{"spec": {"generateExisting": true}}'
+      - --context
+      - $CONTEXT
 
   remove_finalizers:
     shortCut: Shift-F
@@ -70,4 +69,4 @@ plugins:
     confirm: true
     args:
       - -c
-      - "kubectl --kubeconfig=$KUBECONFIG debug -it --context $CONTEXT -n=$NAMESPACE $POD --target=$NAME --image=nicolaka/netshoot:v0.13 --share-processes -- bash"
+      - "kubectl debug -it --context $CONTEXT -n=$NAMESPACE $POD --target=$NAME --image=nicolaka/netshoot:v0.13 --share-processes --custom=<(echo '{\"securityContext\":{\"runAsNonRoot\":false,\"runAsUser\":0}}') -- bash"

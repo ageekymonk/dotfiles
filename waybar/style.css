@@ -1,0 +1,258 @@
+/* @define-color foreground #F5FBFE;
+@define-color background #111413;
+@define-color background-alt rgba(17,20,19,0.25);
+@define-color cursor #F5FBFE;
+
+@define-color color0 #383B3B;
+@define-color color1 #885F2C;
+@define-color color2 #6D7A5C;
+@define-color color3 #B06B07;
+@define-color color4 #768C80;
+@define-color color5 #90A129;
+@define-color color6 #A9B7BD;
+@define-color color7 #E8F1F5;
+@define-color color8 #A2A9AC;
+@define-color color9 #B57E3B;
+@define-color color10 #91A27A;
+@define-color color11 #EA8F09;
+@define-color color12 #9EBAAA;
+@define-color color13 #C1D736;
+@define-color color14 #E2F5FC;
+@define-color color15 #E8F1F5;  */
+
+
+@define-color foreground #b4bdbd;
+@define-color background #0B0E08;
+@define-color cursor #b4bdbd;
+
+@define-color color0 #0B0E08;
+@define-color color1 #A63F09;
+@define-color color2 #E45F05;
+@define-color color3 #6E8F13;
+@define-color color4 #738866;
+@define-color color5 #9FB220;
+@define-color color6 #F69A06;
+@define-color color7 #b4bdbd;
+@define-color color8 #7d8484;
+@define-color color9 #A63F09;
+@define-color color10 #E45F05;
+@define-color color11 #6E8F13;
+@define-color color12 #738866;
+@define-color color13 #9FB220;
+@define-color color14 #F69A06;
+@define-color color15 #b4bdbd;
+
+
+* {
+    border: none;
+    border-radius: 0;
+    font-family: "JetBrainsMono", "Font Awesome 6 Free";
+    font-size: 14px;
+    min-height: 0;
+    transition-property: background-color;
+    transition-duration: 0.2s;
+}
+
+window#waybar {
+    background-color: rgba(0, 43, 54, 0.0);  /* Transparent background */
+    color: @color4;
+}
+
+tooltip {
+    background-color: @color0;
+    border: 2px solid @color13;
+    border-radius: 8px;
+}
+
+tooltip label {
+    color: @color5;
+}
+
+/* Floating module style - common properties */
+#workspaces button,
+#mode,
+#clock,
+#cpu,
+#custom-scripts,
+#memory,
+#temperature,
+#battery,
+#network,
+#pulseaudio,
+#tray,
+#custom-media,
+#custom-power,
+#idle_inhibitor,
+#language,
+#backlight,
+#window,
+#disk {
+    margin: 5px 2px;
+    padding: 0 12px;
+    border-radius: 10px;
+    background-color: @color1;
+    color: @color5;
+    box-shadow: 0 2px 3px rgba(0, 0, 0, 0.2);
+}
+
+/* Workspaces module */
+#workspaces button {
+    padding: 0 6px;
+    background-color: @color1;
+    color: @color4;
+    min-width: 30px;
+}
+
+#workspaces button:hover {
+    background-color: @color2;
+    box-shadow: 0 2px 3px rgba(0, 0, 0, 0.3);
+}
+
+#workspaces button.active {
+    background-color: @color13;
+    color: @color0;
+    box-shadow: inset 0 0 0 2px @color6;
+    text-shadow: 0 0 5px @color7;
+}
+
+#workspaces button.urgent {
+    background-color: @color10;
+    color: @color7;
+}
+
+/* Clock module, Scripts module and window title */
+#clock, #custom-scripts, #window {
+    background-color: @color14;
+    color: @color0;
+    font-weight: bold;
+}
+
+/* System modules */
+#cpu {
+    background-color: @color15;
+    color: @color0;
+}
+
+#memory {
+    background-color: @color8;
+    color: @color0;
+}
+
+#temperature {
+    background-color: @color9;
+    color: @color0;
+}
+
+#temperature.critical {
+    background-color: @color10;
+    color: @color7;
+    animation: blink 1s infinite alternate;
+}
+
+/* Battery module */
+#battery {
+    background-color: @color12;
+    color: @color0;
+}
+
+#battery.charging {
+    background-color: @color15;
+    color: @color0;
+}
+
+#battery.warning:not(.charging) {
+    background-color: @color8;
+    color: @color0;
+}
+
+#battery.critical:not(.charging) {
+    background-color: @color10;
+    color: @color7;
+    animation: blink 1s infinite alternate;
+}
+
+/* Network module */
+#network {
+    background-color: @color13;
+    color: @color0;
+}
+
+#network.disconnected {
+    background-color: @color10;
+    color: @color7;
+}
+
+/* Media modules */
+#pulseaudio {
+    background-color: @color11;
+    color: @color0;
+}
+
+#pulseaudio.muted {
+    background-color: @color2;
+    color: @color5;
+}
+
+#backlight {
+    background-color: @color8;
+    color: @color0;
+}
+
+/* Language module */
+#language {
+    background-color: @color9;
+    color: @color0;
+    min-width: 40px;
+}
+
+/* Custom modules */
+#custom-media {
+    background-color: @color12;
+    color: @color0;
+    min-width: 100px;
+}
+
+#custom-power {
+    background-color: @color10;
+    color: @color7;
+    margin-right: 6px;
+}
+
+/* System tray */
+#tray {
+    background-color: @color1;
+}
+
+#tray > .passive {
+    -gtk-icon-effect: dim;
+}
+
+#tray > .needs-attention {
+    -gtk-icon-effect: highlight;
+    background-color: @color10;
+}
+
+/* Disk usage */
+#disk {
+    background-color: @color15;
+    color: @color0;
+}
+
+/* Animation for critical indicators */
+@keyframes blink {
+    to {
+        background-color: @color7;
+        color: @color10;
+    }
+}
+
+/* Idle inhibitor module */
+#idle_inhibitor {
+    background-color: @color2;
+    color: @color5;
+}
+
+#idle_inhibitor.activated {
+    background-color: @color8;
+    color: @color0;
+}
