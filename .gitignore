@@ -26,3 +26,7 @@ git/gitconfig
 git/gitconfig-*
 
 **/node_modules/*
+nushell/mise.nu
+nushell/history.txt
+
+.zed/
