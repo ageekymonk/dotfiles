@@ -30,3 +30,13 @@ nushell/mise.nu
 nushell/history.txt
 
 .zed/
+
+tags
+test.sh
+.luarc.json
+nvim
+
+spell/
+lazy-lock.json
+
+.github
