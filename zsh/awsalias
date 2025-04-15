@@ -95,7 +95,7 @@ function attach-scp() {
 function list-permission-sets() {
     instance_store_id=$(bkt --ttl=1y -- aws sso-admin list-instances --query "Instances[0].IdentityStoreId")
     instance_store_arn=$(bkt --ttl=1y -- aws sso-admin list-instances | jq -r -c '.Instances[0].InstanceArn')
-    permission_sets=$(bkt --ttl=1d -- aws sso-admin list-permission-sets --instance-arn ${instance_store_arn})
+    permission_sets=$(bkt --ttl=5m -- aws sso-admin list-permission-sets --instance-arn ${instance_store_arn})
     echo ${permission_sets} | jq -r -c '.PermissionSets[]' | \
     xargs -I {} bkt --ttl=1d -- aws sso-admin describe-permission-set --instance-arn ${instance_store_arn} --permission-set-arn {} | jq -r -c '.PermissionSet | [.Name, .PermissionSetArn] | @tsv'
 }
