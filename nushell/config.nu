@@ -86,8 +86,10 @@ $env.config = {
 #     )
 
 # )
-
+$env.config.hooks.env_change.PWD = (
+    $env.config.hooks.env_change.PWD | append (source hooks/direnv.nu)
+)
 
 use ($nu.default-config-dir | path join mise.nu)
-
+$env.PATH = ($env.PATH | split row (char esep) | append "~/.nix-profile/bin")
 source alias.nu
