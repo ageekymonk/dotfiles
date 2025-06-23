@@ -12,7 +12,6 @@ then
     ZSH_CUSTOM=$ZSH_CONFIG_DIR
     source /Users/$USERNAME/.iterm2_shell_integration.zsh
     # source $HOMEBREW_PREFIX/opt/zinit/zinit.zsh
-    . $HOMEBREW_PREFIX/opt/asdf/libexec/asdf.sh
     . $HOMEBREW_PREFIX/etc/profile.d/z.sh
     export AWS_VAULT_BACKEND=keychain
 
@@ -220,5 +219,4 @@ export PAGER=
 # bun
 export BUN_INSTALL="$HOME/.local/share/reflex/bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
-source /etc/profile.d/google-cloud-cli.sh
 
