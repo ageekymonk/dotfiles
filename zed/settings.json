@@ -13,15 +13,41 @@
       "proxy": null,
       "proxy_no_verify": null
     },
-    "enabled_in_assistant": false
+    "enabled_in_text_threads": false
   },
-  "assistant": {
-    "enable_experimental_live_diffs": true,
+  "agent": {
+    "default_profile": "ask",
+    "inline_assistant_model": {
+      "provider": "copilot_chat",
+      "model": "claude-3.7-sonnet"
+    },
+    "always_allow_tool_actions": true,
     "default_model": {
       "provider": "copilot_chat",
-      "model": "claude-3-7-sonnet"
+      "model": "claude-3.7-sonnet"
     },
     "version": "2"
+  },
+  "context_servers": {
+    "awslabs.eks-mcp-server": {
+      "command": {
+        "path": "uvx",
+        "args": [
+          "awslabs.eks-mcp-server@latest",
+          "--allow-write",
+          "--allow-sensitive-data-access"
+        ],
+        "env": {
+          "FASTMCP_LOG_LEVEL": "ERROR",
+          "AWS_PROFILE": "default",
+          "AWS_REGION": "ap-southeast-2"
+        }
+      },
+      "settings": {
+        "transportType": "stdio",
+        "autoApprove": []
+      }
+    }
   },
   "base_keymap": "VSCode",
   "vim_mode": true,
@@ -36,10 +62,42 @@
     "light": "Gruvbox Dark Hard",
     "dark": "One Dark"
   },
-  "terminal": {
-    "shell": {
-      "program": "nu"
-    },
-    "detect_venv": "off"
+  "languages": {
+    "Python": {
+      "language_servers": ["pyrefly", "ruff"],
+      "format_on_save": "on",
+      "formatter": [
+        {
+          "code_actions": {
+            "source.organizeImports.ruff": true,
+            "source.fixAll.ruff": true
+          }
+        },
+        {
+          "language_server": {
+            "name": "ruff"
+          }
+        }
+      ]
+    }
   }
+  // "terminal": {
+  //   "shell": {
+  //     "program": "nu"
+  //   },
+  //   "detect_venv": "off"
+  // },
+  // "lsp": {
+  //   "pyright": {
+  //     "settings": {
+  //       "python.analysis": {
+  //         "diagnosticMode": "workspace",
+  //         "typeCheckingMode": "strict"
+  //       },
+  //       "python": {
+  //         "pythonPath": ".venv/bin/python"
+  //       }
+  //     }
+  //   }
+  // }
 }
