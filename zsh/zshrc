@@ -32,7 +32,6 @@ then
     #         print -P "%F{160}▓▒░ The clone has failed.%f"
     # fi
     # source "$HOME/.zinit/bin/zinit.zsh"
-    . $HOME/.asdf/asdf.sh
     source /usr/share/z/z.sh
     export AWS_VAULT_BACKEND=pass
 fi
@@ -219,4 +218,5 @@ export PAGER=
 # bun
 export BUN_INSTALL="$HOME/.local/share/reflex/bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
-
+export PATH="$HOME/.ghcup/bin:$PATH"
+source /etc/profile.d/google-cloud-cli.sh
