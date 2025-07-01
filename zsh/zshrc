@@ -10,9 +10,6 @@ then
     ZSH_CONFIG_FILE=`greadlink -f ~/.zshrc`
     ZSH_CONFIG_DIR=`dirname $ZSH_CONFIG_FILE`
     ZSH_CUSTOM=$ZSH_CONFIG_DIR
-    source /Users/$USERNAME/.iterm2_shell_integration.zsh
-    # source $HOMEBREW_PREFIX/opt/zinit/zinit.zsh
-    . $HOMEBREW_PREFIX/etc/profile.d/z.sh
     export AWS_VAULT_BACKEND=keychain
 
 elif [[ "$(uname)" == "Linux" ]]
@@ -84,22 +81,13 @@ gpgconf --launch gpg-agent
 export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
 export PATH="/usr/local/opt/mysql-client/bin:$PATH"
 
-export PATH="$PATH:$HOME/.bash-my-aws/bin"
-source ~/.bash-my-aws/aliases
-source ~/.bash-my-aws/bash_completion.sh
-
 source $ZSH_CUSTOM/zshalias
-export PATH="$PATH:${BMA_HOME:-$HOME/.bash-my-aws}/bin"
-source ${BMA_HOME:-$HOME/.bash-my-aws}/aliases
-
 
 fpath=(${ASDF_DIR}/completions $fpath)
 
 # Enable Ctrl-x-e to edit command line
 autoload -U +X compinit && compinit
 autoload -U +X bashcompinit && bashcompinit
-
-source ${BMA_HOME:-$HOME/.bash-my-aws}/bash_completion.sh
 
 # Emacs style
 autoload -U edit-command-line

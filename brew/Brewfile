@@ -4,10 +4,10 @@ tap "abhimanyu003/sttr"
 tap "azure/kubelogin"
 tap "coder/coder"
 tap "derailed/popeye"
-tap "homebrew/bundle"
-tap "homebrew/services"
 tap "jfryy/tap"
 tap "pomdtr/tap"
+# shell history
+brew "atuin"
 # Shell extension to jump to frequently used directories
 brew "autojump"
 # Securely store and access AWS credentials in development environments
@@ -20,6 +20,8 @@ brew "azure-cli"
 brew "bat"
 # CLI utility for caching the output of subprocesses
 brew "bkt"
+# autocomplete 
+brew "carapace"
 # Cut, copy, and paste anything, anywhere, all from the terminal
 brew "clipboard"
 # GNU File, Shell, and Text utilities
@@ -96,10 +98,8 @@ brew "tabiew"
 brew "tailscale", restart_service: :changed
 # Find and verify credentials
 brew "trufflehog"
-# Tracks most-used directories to make cd smarter
-brew "z"
-# Flexible and fast Zsh plugin manager
-brew "zinit"
+# smart cd
+brew "zoxide"
 # A cross-platform, cli app to perform various string operations.
 brew "abhimanyu003/sttr/sttr"
 # A Kubernetes credential (exec) plugin implementing azure authentication
