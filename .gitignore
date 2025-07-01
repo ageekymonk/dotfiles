@@ -41,3 +41,5 @@ lazy-lock.json
 
 .github
 *.msgpackz
+
+git/gitconfig
