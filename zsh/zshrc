@@ -24,15 +24,6 @@ then
     ZSH_CONFIG_DIR=`dirname $ZSH_CONFIG_FILE`
     ZSH_CUSTOM=$ZSH_CONFIG_DIR
     export SHELL=/bin/zsh
-    # if [[ ! -f $HOME/.zinit/bin/zinit.zsh ]]; then
-    #     print -P "%F{33}▓▒░ %F{220}Installing DHARMA Initiative Plugin Manager (zdharma/zinit)…%f"
-    #     command mkdir -p "$HOME/.zinit" && command chmod g-rwX "$HOME/.zinit"
-    #     command git clone https://github.com/zdharma/zinit "$HOME/.zinit/bin" && \
-    #         print -P "%F{33}▓▒░ %F{34}Installation successful.%f" || \
-    #         print -P "%F{160}▓▒░ The clone has failed.%f"
-    # fi
-    # source "$HOME/.zinit/bin/zinit.zsh"
-    source /usr/share/z/z.sh
     export AWS_VAULT_BACKEND=pass
 fi
 
@@ -55,43 +46,11 @@ compinit
 
 DEFAULT_USER=${USER}
 
-# source $ZSH/oh-my-zsh.sh
-
-# zstyle ':completion:*:*:docker:*' option-stacking yes
-# zstyle ':completion:*:*:docker-*:*' option-stacking yes
-
-# zinit snippet OMZ::plugins/git/git.plugin.zsh
-# zinit snippet OMZ::plugins/docker/_docker
-
-
-# zinit snippet https://raw.githubusercontent.com/ageekymonk/kubectl-aliases/master/.kubectl_aliases
-
-# zinit load zsh-users/zsh-autosuggestions
-# zinit load zsh-users/zsh-history-substring-search
-# zinit load zsh-users/zsh-completions
-# zinit load zsh-users/zsh-syntax-highlighting
-# zinit load wfxr/forgit
-
-# zinit as"program" make'!' atclone'./direnv hook zsh > zhook.zsh' \
-#       atpull'%atclone' pick"direnv" src"zhook.zsh" for \
-#       direnv/direnv
-
-
-# zinit wait lucid for \
-#       hlissner/zsh-autopair
-
-# zinit light-mode lucid wait has"kubectl" for \
-#       id-as"kubectl_completion" \
-#       as"completion" \
-#       atclone"kubectl completion zsh > _kubectl" \
-#       atpull"%atclone" \
-#       run-atpull \
-#       zdharma-continuum/null
-
 # User configuration
 
 eval "$(atuin init zsh)"
 eval "$(starship init zsh)"
+eval "$(zoxide init zsh)"
 
 # Do not record duplicate in your history
 export HISTCONTROL=ignoreboth:erasedups
@@ -112,17 +71,6 @@ setopt autocd
 HISTSIZE=1000000
 SAVEHIST=1000000
 HISTFILE=~/.zsh_history
-
-
-# Configure virtualenv and pyenv
-# if which pyenv > /dev/null;
-# then
-#     eval "$(pyenv init -)";
-# fi
-
-# if which pyenv-virtualenv-init > /dev/null; then
-#     eval "$(pyenv virtualenv-init -)";
-# fi
 
 # fzf
 
