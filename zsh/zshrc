@@ -41,9 +41,6 @@ eval "$(atuin init zsh)"
 eval "$(starship init zsh)"
 eval "$(zoxide init zsh)"
 
-export CARAPACE_BRIDGES='zsh,fish,bash,inshellisense' # optional
-zstyle ':completion:*' format $'\e[2;37mCompleting %d\e[m'
-source <(carapace _carapace)
 
 # Do not record duplicate in your history
 export HISTCONTROL=ignoreboth:erasedups
@@ -82,8 +79,6 @@ export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
 export PATH="/usr/local/opt/mysql-client/bin:$PATH"
 
 source $ZSH_CUSTOM/zshalias
-
-fpath=(${ASDF_DIR}/completions $fpath)
 
 # Enable Ctrl-x-e to edit command line
 autoload -U +X compinit && compinit
@@ -152,3 +147,13 @@ export PAGER=
 export BUN_INSTALL="$HOME/.local/share/reflex/bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
 export PATH="$HOME/.ghcup/bin:$PATH"
+# The following lines have been added by Docker Desktop to enable Docker CLI completions.
+fpath=(/Users/private/.docker/completions $fpath)
+autoload -Uz compinit
+compinit
+# End of Docker CLI completions
+
+export CARAPACE_BRIDGES='zsh,fish,bash,inshellisense' # optional
+zstyle ':completion:*' format $'\e[2;37mCompleting %d\e[m'
+
+source <(carapace _carapace)

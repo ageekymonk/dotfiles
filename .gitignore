@@ -43,3 +43,4 @@ lazy-lock.json
 *.msgpackz
 
 git/gitconfig
+nushell/vendor/autoload/*
