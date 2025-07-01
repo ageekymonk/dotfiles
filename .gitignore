@@ -40,3 +40,4 @@ spell/
 lazy-lock.json
 
 .github
+*.msgpackz
