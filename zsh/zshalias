@@ -312,6 +312,7 @@ alias cat=bat
 
 # autojump
 alias j='z'
+alias ji='zi'
 
 # exa
 alias ls='eza'

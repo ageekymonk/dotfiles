@@ -27,14 +27,6 @@ then
     export AWS_VAULT_BACKEND=pass
 fi
 
-# Oh My ZSH Configuration
-# CASE_SENSITIVE="true"
-# UPDATE_ZSH_DAYS=15
-# ENABLE_CORRECTION="false"
-# COMPLETION_WAITING_DOTS="true"
-# DISABLE_UNTRACKED_FILES_DIRTY="true"
-# HIST_STAMPS="mm/dd/yyyy"
-
 autoload -Uz bashcompinit
 bashcompinit
 
