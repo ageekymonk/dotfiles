@@ -90,6 +90,7 @@ DEFAULT_USER=${USER}
 
 # User configuration
 
+eval "$(atuin init zsh)"
 eval "$(starship init zsh)"
 
 # Do not record duplicate in your history
