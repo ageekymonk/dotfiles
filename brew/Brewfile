@@ -98,8 +98,6 @@ brew "rust"
 brew "starship"
 # TUI to view and query tabular files (CSV,TSV, Parquet, etc.)
 brew "tabiew"
-# Easiest, most secure way to use WireGuard and 2FA
-brew "tailscale", restart_service: :changed
 # Find and verify credentials
 brew "trufflehog"
 # smart cd
@@ -138,6 +136,8 @@ cask "lm-studio"
 cask "notion"
 # Control your tools with a few keystrokes
 cask "raycast"
+# Tailscale app for macOS
+cask "tailscale-app"
 # Web browser focusing on security
 cask "tor-browser"
 # Open-source code editor
