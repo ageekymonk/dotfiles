@@ -619,16 +619,20 @@ def edit-kms-key-policy [] {
 }
 alias lambda-list-functions = aws-list-cmd lambda list-functions Functions FunctionName
 # Organizations
-def list-org-root [] {
-    aws organizations list-roots |
+def list-org-root [
+--profile: string = ""  # aws profile to use
+] {
+    aws organizations list-roots --profile $profile |
     from json |
     get Roots |
     each {|root| [$root.Id, $root.Name]} |
     get 0.0
 }
 
-def list-ous [] {
-    aws organizations list-organizational-units-for-parent --parent-id (list-org-root) |
+def list-ous [
+    --profile: string = ""  # aws profile to use
+] {
+    aws organizations list-organizational-units-for-parent --profile $profile --parent-id (list-org-root --profile $profile) |
     from json |
     get OrganizationalUnits |
     each {|ou| [$ou.Id, $ou.Name]} |
@@ -637,8 +641,10 @@ def list-ous [] {
     get 0
 }
 
-def list-scps [] {
-    aws organizations list-policies --filter SERVICE_CONTROL_POLICY |
+def list-scps [
+    --profile: string = ""  # aws profile to use
+] {
+    aws organizations list-policies --filter SERVICE_CONTROL_POLICY --profile $profile |
     from json |
     get Policies |
     each {|policy| [$policy.Id, $policy.Name]} |
@@ -648,22 +654,25 @@ def list-scps [] {
 }
 
 def detach-scp [
+    --profile: string = "",  # aws profile to use
     --policyid: string = "" # Optional SCP policy ID
 ] {
-    let scp = if $policyid == "" { list-scps } else { $policyid }
-    let roots = (list-ous)
+
+    let scp = if $policyid == "" { list-scps --profile $profile } else { $policyid }
+    let roots = (list-ous --profile $profile)
     $roots | each {|root|
-        aws organizations detach-policy --policy-id $scp --target-id $root | from json
+        aws organizations detach-policy --profile $profile --policy-id $scp --target-id $root | from json
     }
 }
 
 def attach-scp [
+    --profile: string = "",  # aws profile to use
     --policyid: string = "" # Optional SCP policy ID
 ] {
-    let scp = if $policyid == "" { list-scps } else { $policyid }
-    let roots = (list-ous)
+    let scp = if $policyid == "" { list-scps --profile $profile } else { $policyid }
+    let roots = (list-ous --profile $profile)
     $roots | each {|root|
-        aws organizations attach-policy --policy-id $scp --target-id $root | from json
+        aws organizations attach-policy --profile $profile --policy-id $scp --target-id $root | from json
     }
 }
 
