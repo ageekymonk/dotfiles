@@ -655,22 +655,64 @@ def list-scps [
 
 def detach-scp [
     --profile: string = "",  # aws profile to use
-    --policyid: string = "" # Optional SCP policy ID
+    --policyid: string = "", # Optional SCP policy ID
+    --policyname: string = "", # Optional SCP policy name
+    --ouname: string = "" # Optional OU name
 ] {
+    let scp = if $policyid != "" {
+        $policyid
+    } else if $policyname != "" {
+        aws organizations list-policies --filter SERVICE_CONTROL_POLICY --profile $profile |
+        from json |
+        get Policies |
+        where Name == $policyname |
+        get 0.Id
+    } else {
+        list-scps --profile $profile
+    }
 
-    let scp = if $policyid == "" { list-scps --profile $profile } else { $policyid }
-    let roots = (list-ous --profile $profile)
+    let roots = if $ouname != "" {
+        aws organizations list-organizational-units-for-parent --profile $profile --parent-id (list-org-root --profile $profile) |
+        from json |
+        get OrganizationalUnits |
+        where Name == $ouname |
+        get 0.Id
+    } else {
+        list-ous --profile $profile
+    }
+
     $roots | each {|root|
         aws organizations detach-policy --profile $profile --policy-id $scp --target-id $root | from json
     }
 }
-
 def attach-scp [
     --profile: string = "",  # aws profile to use
-    --policyid: string = "" # Optional SCP policy ID
+    --policyid: string = "", # Optional SCP policy ID
+    --policyname: string = "", # Optional SCP policy name
+    --ouname: string = "" # Optional OU name
 ] {
-    let scp = if $policyid == "" { list-scps --profile $profile } else { $policyid }
-    let roots = (list-ous --profile $profile)
+    let scp = if $policyid != "" {
+        $policyid
+    } else if $policyname != "" {
+        aws organizations list-policies --filter SERVICE_CONTROL_POLICY --profile $profile |
+        from json |
+        get Policies |
+        where Name == $policyname |
+        get 0.Id
+    } else {
+        list-scps --profile $profile
+    }
+
+    let roots = if $ouname != "" {
+        aws organizations list-organizational-units-for-parent --profile $profile --parent-id (list-org-root --profile $profile) |
+        from json |
+        get OrganizationalUnits |
+        where Name == $ouname |
+        get 0.Id
+    } else {
+        list-ous --profile $profile
+    }
+
     $roots | each {|root|
         aws organizations attach-policy --profile $profile --policy-id $scp --target-id $root | from json
     }
