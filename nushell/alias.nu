@@ -6,17 +6,27 @@ alias ps = pik
 
 alias gst = git status
 
+
+# profiles
+def profiles [] {
+    aws configure list-profiles | lines
+}
+
+def regions [] {
+    ["us-east-1", "ap-southeast-2", "us-west-2"]
+}
+
 # Account
 def account-id [
-    --profile: string  # AWS profile to use
+    --profile: string@profiles  # AWS profile to use
 ] {
     aws sts get-caller-identity --profile $profile | from json | get Account
 }
 
 # ACM
 def acm-list-expired-certificates [
-    --profile: string = ""  # AWS profile to use
-    --region: string  = "us-east-1" # AWS Region to use
+    --profile: string@profiles = ""  # AWS profile to use
+    --region: string@regions  = "us-east-1" # AWS Region to use
 ] {
     let cmd = if ($profile | is-empty) {
         aws acm list-certificates --region $region
@@ -654,7 +664,7 @@ def list-scps [
 }
 
 def detach-scp [
-    --profile: string = "",  # aws profile to use
+    --profile: string@profiles = "",  # aws profile to use
     --policyid: string = "", # Optional SCP policy ID
     --policyname: string = "", # Optional SCP policy name
     --ouname: string = "" # Optional OU name
@@ -686,7 +696,7 @@ def detach-scp [
     }
 }
 def attach-scp [
-    --profile: string = "",  # aws profile to use
+    --profile: string@profiles = "",  # aws profile to use
     --policyid: string = "", # Optional SCP policy ID
     --policyname: string = "", # Optional SCP policy name
     --ouname: string = "" # Optional OU name
