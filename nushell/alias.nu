@@ -43,8 +43,8 @@ def aws-list-cmd [
     actionname: string # AWS action name
     ResponseKey: string # JSON response key to extract
     PrimaryKey: string # Json Primary key in the array
-    --profile: string = "" # AWS profile to use
-    --region: string = "us-east-1" # AWS region to use
+    --profile: string@profiles = "" # AWS profile to use
+    --region: string@regions = "us-east-1" # AWS region to use
 ] {
     let cmd = if ($profile | is-empty) {
         aws $servicename $actionname --region $region
