@@ -1,5 +1,7 @@
 [user]
   useConfigOnly = true
+	email = ramz@techniumlabs.io
+	name = ramz
 
 [core]
   excludesfile = ~/.gitignore
