@@ -81,7 +81,7 @@
 
 
 [pull]
-  rebase = true
+	rebase = true
 
 [rebase]
   autostash = true
@@ -137,6 +137,7 @@
 
 [init]
   templatedir = ~/.git-template
+	defaultBranch = main
 
 [diff "plist"]
   textconv = "plutil -convert xml1 -o -"
@@ -166,3 +167,8 @@
   strategy = incremental
 [credential "https://dev.azure.com"]
 	useHttpPath = true
+[alias]
+	co = checkout
+	br = branch
+	ci = commit
+	st = status

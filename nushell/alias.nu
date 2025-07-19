@@ -80,20 +80,40 @@ def bucket-policy [] {
     aws s3api get-bucket-policy --bucket $bucket | from json | get Policy | from json
 }
 
-def edit-bucket-policy [] {
-    let bucketname = (s3-list-buckets | sk | get 0)
+def edit-bucket-policy [
+    bucketname?: string,  # Optional bucket name (selected from list if not provided)
+    --profile: string@profiles = "",  # AWS profile to use
+    --region: string@regions = "us-east-1"  # AWS region to use
+] {
+    let bucket = if $bucketname == null {
+        s3-list-buckets --profile $profile --region $region | get Name
+    } else {
+        $bucketname
+    }
 
+    let cmd_get = if ($profile | is-empty) {
+        aws s3api get-bucket-policy --bucket $bucket --region $region
+    } else {
+        aws s3api get-bucket-policy --bucket $bucket --profile $profile --region $region
+    }
+
+    $env.EDITOR = "code -w"
     let policy = (
-        aws s3api get-bucket-policy --bucket $bucketname |
+        $cmd_get |
         from json |
         get Policy |
         from json |
         to json -i 2 |
-        ^code - |
-        to json -r
+        vipe
     )
 
-    aws s3api put-bucket-policy --bucket $bucketname --policy $policy | from json
+    let cmd_put = if ($profile | is-empty) {
+        aws s3api put-bucket-policy --bucket $bucket --policy $policy --region $region | from json
+    } else {
+        aws s3api put-bucket-policy --bucket $bucket --policy $policy --profile $profile --region $region | from json
+    }
+
+    $cmd_put
 }
 
 def bucket-add-tag [
@@ -147,7 +167,7 @@ def cloudformation-update-stackset [
     let fname = (gum file)
     if $fname != null {
         let stackset = cloudformation-list-stacksets --profile $profile --region $region
-        aws cloudformation update-stack-set  --profile $profile --region $region --stack-set-name $stackset.StackSetName --template-body (open $fname | str join) --capabilities CAPABILITY_NAMED_IAM | from json
+        aws cloudformation update-stack-set  --profile $profile --region $region --stack-set-name $stackset.StackSetName --template-body file://($fname) --capabilities CAPABILITY_NAMED_IAM | from json
     }
 }
 
@@ -424,7 +444,7 @@ def attach-iam-policy [
     policyname?: string  # Policy name
     --profile: string    # AWS profile to use
 ] {
-    let role_name = if $rolename == null { list-iam-roles $profile | sk | split row " " | get 0 } else { $rolename }
+    let role_name = if $rolename == null { iam-list-roles --profile $profile | sk | split row " " | get 0 } else { $rolename }
     let policy_name = if $policyname == null { list-iam-policy | sk | split row " " | get 0 } else { $policyname }
 
     let policy_arn = if $profile == null {
@@ -452,8 +472,8 @@ def list-iam-policy [] {
 }
 
 def edit-iam-role-inline-policy [
-    --profile: string = ""  # AWS profile to use
-    --region: string = "us-east-1"  # AWS region to use
+    --profile: string@profiles = ""  # AWS profile to use
+    --region: string@regions = "us-east-1"  # AWS region to use
 ] {
     let rolename = (iam-list-roles --profile $profile | get RoleName)
     print $rolename
@@ -471,13 +491,12 @@ def edit-iam-role-inline-policy [
         aws iam get-role-policy --role-name $rolename --policy-name $inline_policy --profile $profile --region $region
     }
 
+    $env.EDITOR = "code -w"
     let policy = ($cmd_get |
         from json |
         get PolicyDocument |
         to json -i 2 |
-        ^code - |
-        from json |
-        to json -r)
+        vipe)
 
     if ($profile | is-empty) {
         aws iam put-role-policy --role-name $rolename --policy-name $inline_policy --policy-document $policy --region $region | from json
@@ -530,7 +549,7 @@ def clone-iam-role-cross-account [
     let src_profile = if $src_account == null { gum input --placeholder "Input profile" } else { $src_account }
     let dest_profile = if $dest_account == null { gum input --placeholder "Output profile" } else { $dest_account }
 
-    let rolename = (list-iam-roles --profile $src_profile | sk | get 0)
+    let rolename = (iam-list-roles --profile $src_profile | sk | get 0)
     let newrolename = (gum input --placeholder "New Role Name")
 
     # Create new role with same trust policy
@@ -551,18 +570,30 @@ def clone-iam-role-cross-account [
     }
 }
 
-def edit-iam-role-trust-policy [] {
-    let rolename = (list-iam-roles | sk | get 0)
+def edit-iam-role-trust-policy [
+    --profile: string@profiles = "",  # AWS profile to use
+    --region: string@regions = "us-east-1"  # AWS region to use
+] {
+    let rolename = (iam-list-roles --profile $profile --region $region | get RoleName )
 
-    let policy = (aws iam get-role --role-name $rolename |
+    let cmd_get = if ($profile | is-empty) {
+        aws iam get-role --role-name $rolename --region $region
+    } else {
+        aws iam get-role --role-name $rolename --profile $profile --region $region
+    }
+
+    $env.EDITOR = "code -w"
+    let policy = ($cmd_get |
         from json |
         get Role.AssumeRolePolicyDocument |
         to json -i 2 |
-        ^code - |
-        from json |
-        to json -r)
+        vipe)
 
-    aws iam update-assume-role-policy --role-name $rolename --policy-document $policy | from json
+    if ($profile | is-empty) {
+        aws iam update-assume-role-policy --role-name $rolename --policy-document $policy --region $region | from json
+    } else {
+        aws iam update-assume-role-policy --role-name $rolename --policy-document $policy --profile $profile --region $region | from json
+    }
 }
 
 def iam-policy [] {

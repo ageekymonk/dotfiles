@@ -24,6 +24,7 @@ input {
             // For example:
             // layout "us,ru"
             // options "grp:win_space_toggle,compose:ralt,ctrl:nocaps"
+            options "lv5:caps_switch"
         }
     }
 
@@ -352,6 +353,9 @@ binds {
 
     // Suggested binds for running programs: terminal, app launcher, screen locker.
     Super+T { spawn "ghostty"; }
+    Super+a { spawn "ghostty" "-e" "btop"; }
+    Super+d { spawn "ghostty" "-e" "lazydocker"; }
+    ISO_Level5_Shift+n { spawn "nautilus" "--new-window"; }
     Super+Space { spawn "rofi" "-combi-modes" "drun,window" "-theme" "solarized" "-show" "combi"; }
     Super+Alt+L { spawn "swaylock"; }
     F1 { spawn "clapboard"; }
