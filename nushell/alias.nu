@@ -16,6 +16,10 @@ def regions [] {
     ["us-east-1", "ap-southeast-2", "us-west-2"]
 }
 
+def s3-notification-targets [] {
+    ["sqs", "sns", "lambda"]
+}
+
 # Account
 def account-id [
     --profile: string@profiles  # AWS profile to use
@@ -151,6 +155,101 @@ def bucket-add-tag [
         rm $temp_file
     }
 }
+
+def s3-create-notification [
+--name: string = "",    # Name of the notification configuration
+--bucket: string = "",   # S3 bucket name (if empty, will prompt selection)
+--events: string = "s3:ObjectCreated:*",   # Event types to monitor (comma-separated)
+--prefix: string = "",   # Optional prefix filter
+--suffix: string = "",   # Optional suffix filter
+--target-type: string@s3-notification-targets = "sns",   # Notification target type
+--target-arn: string = "",   # ARN of the target (if empty, will prompt selection)
+--profile: string@profiles = "",   # AWS profile to use
+--region: string@regions = "us-east-1"   # AWS region to use
+] {
+    # Select bucket if not provided
+    let bucket_name = if $bucket == "" {
+        s3-list-buckets --profile $profile --region $region | get Name
+    } else {
+        $bucket
+    }
+
+    # Get target ARN if not provided
+    let target = if $target_arn == "" {
+        if $target_type == "sns" {
+            sns-list-topics --profile $profile --region $region | get TopicArn
+        } else if $target_type == "sqs" {
+            sqs-list-queues --profile $profile --region $region | get 0
+        } else if $target_type == "lambda" {
+            lambda-list-functions --profile $profile --region $region | get FunctionName
+        } else {
+            error make {msg: "Invalid target type"}
+        }
+    } else {
+        $target_arn
+    }
+
+    # Build configuration JSON
+    mut config = {
+        Events: ($events | split row "," | each {|e| $e | str trim}),
+        Id: $name
+    }
+
+    # Add filters if provided
+    if $prefix != "" or $suffix != "" {
+        $config.Filter = {
+            Key: {
+                FilterRules: []
+            }
+        }
+
+        if $prefix != "" {
+            $config.Filter.Key.FilterRules = ($config.Filter.Key.FilterRules | append {
+                Name: "prefix"
+                Value: $prefix
+            })
+        }
+
+        if $suffix != "" {
+            $config.Filter.Key.FilterRules = ($config.Filter.Key.FilterRules | append {
+                Name: "suffix"
+                Value: $suffix
+            })
+        }
+    }
+
+    # Add target configuration
+    mut configrecord = {}
+    if $target_type == "sns" {
+        $config.TopicArn = $target
+        $configrecord.TopicConfigurations = [$config]
+    } else if $target_type == "sqs" {
+        $config.QueueArn = $target
+        $configrecord.QueueConfigurations = [$config]
+    } else if $target_type == "lambda" {
+        $config.LambdaFunctionArn = $target
+        $configrecord.LambdaFunctionConfigurations = [$config]
+    }
+
+    # Create notification configuration
+    let temp_file = mktemp
+    $configrecord | to json | save -f $temp_file
+
+    # Apply the notification configuration
+    let cmd = if ($profile | is-empty) {
+        aws s3api put-bucket-notification-configuration --bucket $bucket_name --notification-configuration $"file://($temp_file)" --region $region --skip-destination-validation
+    } else {
+        aws s3api put-bucket-notification-configuration --bucket $bucket_name --notification-configuration $"file://($temp_file)" --profile $profile --region $region --skip-destination-validation
+    }
+
+    cat $temp_file
+    # Delete the temporary file
+    rm $temp_file
+
+    # Return the result
+    $cmd | from json
+}
+
 alias appsync-list-graphql-apis = aws-list-cmd appsync list-graphql-apis graphqlApis name
 alias cloudformation-list-stacks = aws-list-cmd cloudformation list-stacks StackSummaries StackName
 alias cloudformation-list-stacksets = aws-list-cmd cloudformation list-stack-sets Summaries StackSetName

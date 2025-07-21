@@ -361,7 +361,7 @@ binds {
     Super+T { spawn "ghostty"; }
     Super+a { spawn "ghostty" "-e" "btop"; }
     Super+d { spawn "ghostty" "-e" "lazydocker"; }
-    ISO_Level5_Shift+n { spawn "nautilus" "--new-window"; }
+    ISO_Level5_Shift+f { spawn "nautilus" "--new-window"; }
     Super+Space { spawn "rofi" "-combi-modes" "drun,window" "-theme" "solarized" "-show" "combi"; }
     Super+Alt+L { spawn "swaylock"; }
     F1 { spawn "clapboard"; }
