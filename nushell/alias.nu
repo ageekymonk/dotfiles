@@ -60,13 +60,24 @@ def aws-list-cmd [
 }
 
 alias acm-list-certificates = aws-list-cmd acm list-certificates CertificateSummaryList DomainName
-# def acm-import-cert [] {
-#     let certfile = (gum file)
-#     let key = (gum file)
-#     # Extract lines between first Begin and End
-#     ^sed '/-----BEGIN CERTIFICATE-----/,/-----END CERTIFICATE-----/!d;/-----END CERTIFICATE-----/q' $certfile | save -f ($certfile | str replace '.crt' '.pem')
-#     aws acm import-certificate --certificate fileb://($certfile | str replace '.crt' '.pem') --private-key fileb://$key | from json
-# }
+def acm-import-cert [
+    --profile: string@profiles = ""  # AWS profile to use
+    --region: string@regions = "us-east-1" # AWS Region to use
+] {
+    let certfile = (gum file)
+    let certfilepem = ($certfile) | str replace ".crt" ".pem"
+    let key = (gum file)
+    # Extract lines between first Begin and End
+    ^sed '/-----BEGIN CERTIFICATE-----/,/-----END CERTIFICATE-----/!d;/-----END CERTIFICATE-----/q' $certfile | save -f ($certfilepem)
+
+    let cmd = if ($profile | is-empty) {
+        aws acm import-certificate --certificate fileb://($certfilepem) --private-key fileb://($key) --region $region
+    } else {
+        aws acm import-certificate --certificate fileb://($certfilepem) --private-key fileb://($key) --profile $profile --region $region
+    }
+
+    $cmd | from json
+}
 alias s3-list-buckets = aws-list-cmd s3api list-buckets Buckets Name
 # Extended S3 commands
 def show-bucket-versioning [] {
@@ -219,35 +230,56 @@ def s3-create-notification [
     }
 
     # Add target configuration
-    mut configrecord = {}
+    let cmd = if ($profile | is-empty) {
+        aws s3api get-bucket-notification-configuration --bucket $bucket_name --region $region
+    } else {
+        aws s3api get-bucket-notification-configuration --bucket $bucket_name --profile $profile --region $region
+    }
+    mut configrecord = $cmd | from json
     if $target_type == "sns" {
         $config.TopicArn = $target
-        $configrecord.TopicConfigurations = [$config]
+        let topicconfig = $configrecord | get -i TopicConfigurations
+        $configrecord = if $topicconfig == null {
+            $configrecord | insert TopicConfigurations  [$config]
+        } else {
+            $configrecord.TopicConfigurations = ($configrecord.TopicConfigurations | append $config)
+        }
     } else if $target_type == "sqs" {
         $config.QueueArn = $target
-        $configrecord.QueueConfigurations = [$config]
+        let topicconfig = $configrecord | get -i QueueConfigurations
+        $configrecord = if $topicconfig == null {
+            print "Adding Queue"
+            $configrecord | insert QueueConfigurations  $config
+        } else {
+            $configrecord.QueueConfigurations = ($configrecord.QueueConfigurations | append $config)
+        }
     } else if $target_type == "lambda" {
         $config.LambdaFunctionArn = $target
-        $configrecord.LambdaFunctionConfigurations = [$config]
+        let topicconfig = $configrecord | get -i LambdaFunctionConfigurations
+        $configrecord = if $topicconfig == null {
+            $configrecord | insert LambdaFunctionConfigurations  [$config]
+        } else {
+            $configrecord.LambdaFunctionConfigurations = ($configrecord.LambdaFunctionConfigurations | append $config)
+        }
     }
 
     # Create notification configuration
     let temp_file = mktemp
     $configrecord | to json | save -f $temp_file
 
-    # Apply the notification configuration
-    let cmd = if ($profile | is-empty) {
-        aws s3api put-bucket-notification-configuration --bucket $bucket_name --notification-configuration $"file://($temp_file)" --region $region --skip-destination-validation
-    } else {
-        aws s3api put-bucket-notification-configuration --bucket $bucket_name --notification-configuration $"file://($temp_file)" --profile $profile --region $region --skip-destination-validation
-    }
-
     cat $temp_file
+    # Apply the notification configuration
+    # let cmd = if ($profile | is-empty) {
+    #     aws s3api put-bucket-notification-configuration --bucket $bucket_name --notification-configuration $"file://($temp_file)" --region $region --skip-destination-validation
+    # } else {
+    #     aws s3api put-bucket-notification-configuration --bucket $bucket_name --notification-configuration $"file://($temp_file)" --profile $profile --region $region --skip-destination-validation
+    # }
+
     # Delete the temporary file
     rm $temp_file
 
     # Return the result
-    $cmd | from json
+    # $cmd | from json
 }
 
 alias appsync-list-graphql-apis = aws-list-cmd appsync list-graphql-apis graphqlApis name
@@ -884,22 +916,48 @@ def show-permission-sets-inline-policy [] {
     ^code -
 }
 
-def edit-permission-sets-inline-policy [] {
-    let instance_store_id = (bkt --ttl=1y -- aws sso-admin list-instances --query "Instances[0].IdentityStoreId" | str trim)
-    let instance_store_arn = (bkt --ttl=1y -- aws sso-admin list-instances | from json | get Instances.0.InstanceArn)
+def edit-permission-sets-inline-policy [
+    --profile: string@profiles = ""  # AWS profile to use
+    --region: string@regions = "us-east-1"  # AWS region to use
+] {
+    let cmd_list_instances = if ($profile | is-empty) {
+        aws sso-admin list-instances --region $region
+    } else {
+        aws sso-admin list-instances --profile $profile --region $region
+    }
+
+    let instance_store_id = (bkt --ttl=1y -- $cmd_list_instances --query "Instances[0].IdentityStoreId" | str trim)
+    let instance_store_arn = (bkt --ttl=1y -- $cmd_list_instances | from json | get Instances.0.InstanceArn)
     let permission_set = (list-permission-sets | sk | split row " " | get 1)
 
-    let policy = (aws sso-admin get-inline-policy-for-permission-set --instance-arn $instance_store_arn --permission-set-arn $permission_set |
+    let cmd_get = if ($profile | is-empty) {
+        aws sso-admin get-inline-policy-for-permission-set --instance-arn $instance_store_arn --permission-set-arn $permission_set --region $region
+    } else {
+        aws sso-admin get-inline-policy-for-permission-set --instance-arn $instance_store_arn --permission-set-arn $permission_set --profile $profile --region $region
+    }
+
+    $env.EDITOR = "code -w"
+    let policy = ($cmd_get |
         from json |
         get InlinePolicy |
         from json |
         to json -i 2 |
-        ^code - |
-        from json |
-        to json -r)
+        vipe)
 
-    aws sso-admin put-inline-policy-to-permission-set --instance-arn $instance_store_arn --permission-set-arn $permission_set --inline-policy $policy | from json
-    aws sso-admin provision-permission-set --instance-arn $instance_store_arn --permission-set-arn $permission_set --target-type ALL_PROVISIONED_ACCOUNTS | from json
+    let cmd_put = if ($profile | is-empty) {
+        aws sso-admin put-inline-policy-to-permission-set --instance-arn $instance_store_arn --permission-set-arn $permission_set --inline-policy $policy --region $region
+    } else {
+        aws sso-admin put-inline-policy-to-permission-set --instance-arn $instance_store_arn --permission-set-arn $permission_set --inline-policy $policy --profile $profile --region $region
+    }
+
+    let cmd_provision = if ($profile | is-empty) {
+        aws sso-admin provision-permission-set --instance-arn $instance_store_arn --permission-set-arn $permission_set --target-type ALL_PROVISIONED_ACCOUNTS --region $region
+    } else {
+        aws sso-admin provision-permission-set --instance-arn $instance_store_arn --permission-set-arn $permission_set --target-type ALL_PROVISIONED_ACCOUNTS --profile $profile --region $region
+    }
+
+    $cmd_put | from json
+    $cmd_provision | from json
 }
 
 def list-groups [] {
@@ -981,16 +1039,79 @@ def delete-subscriptions [] {
 }
 
 # SageMaker
-def sagemaker-notebooks [] {
-    aws sagemaker list-notebook-instances |
-    from json |
-    get NotebookInstances |
-    each {|notebook| [
-        $notebook.NotebookInstanceName,
-        $notebook.NotebookInstanceStatus,
-        $notebook.InstanceType,
-        $notebook.CreationTime
-    ]}
+alias sagemaker-list-notebooks = aws-list-cmd sagemaker list-notebook-instances NotebookInstances NotebookInstanceName
+
+alias sagemaker-list-notebooks = aws-list-cmd sagemaker list-notebook-instances NotebookInstances NotebookInstanceName
+
+def sagemaker-clone-notebook [
+    --profile: string@profiles = "",  # AWS profile to use
+    --region: string@regions = "us-east-1",  # AWS region to use
+    --name: string = "",  # New notebook name (optional)
+    --type: string = ""  # Instance type (optional)
+    --platform-identifier: string = "" # Platform Identifier (optional)
+] {
+    let source_notebook = (sagemaker-list-notebooks --profile $profile --region $region | get NotebookInstanceName)
+
+    # Get source notebook details
+    let cmd_desc = if ($profile | is-empty) {
+        aws sagemaker describe-notebook-instance --notebook-instance-name $source_notebook --region $region
+    } else {
+        aws sagemaker describe-notebook-instance --notebook-instance-name $source_notebook --profile $profile --region $region
+    }
+
+    let details = ($cmd_desc | from json)
+
+    # Prepare new notebook name
+    let new_name = if $name == "" {
+        $source_notebook + "-clone"
+    } else {
+        $name
+    }
+
+    # Prepare instance type
+    let instance_type = if $type == "" {
+        $details.InstanceType
+    } else {
+        $type
+    }
+
+    let platform_identifier = if $type == "" {
+        $details.PlatformIdentifier
+    } else {
+        $platform_identifier
+    }
+    print $details
+    # Create clone notebook
+    let cmd_create = if ($profile | is-empty) {
+        (aws sagemaker create-notebook-instance
+            --notebook-instance-name $new_name
+            --instance-type $instance_type
+            --role-arn $details.RoleArn
+            --subnet-id ($details.SubnetId | default "")
+            --security-group-ids ($details.SecurityGroups | default [])
+            --volume-size-in-gb $details.VolumeSizeInGB
+            --root-access $details.RootAccess
+            --kms-key-id $details.KmsKeyId
+            --direct-internet-access $details.DirectInternetAccess
+            --platform-identifier $platform_identifier
+            --region $region)
+    } else {
+        (aws sagemaker create-notebook-instance
+            --notebook-instance-name $new_name
+            --instance-type $instance_type
+            --role-arn $details.RoleArn
+            --subnet-id ($details.SubnetId | default "")
+            --security-group-ids ...($details.SecurityGroups | default [])
+            --volume-size-in-gb $details.VolumeSizeInGB
+            --root-access $details.RootAccess
+            --kms-key-id $details.KmsKeyId
+            --direct-internet-access $details.DirectInternetAccess
+            --platform-identifier $platform_identifier
+            --profile $profile
+            --region $region)
+    }
+
+    $cmd_create | from json | echo $"Cloned notebook ($source_notebook) to ($new_name)"
 }
 
 def sagemaker-notebook-stop [] {

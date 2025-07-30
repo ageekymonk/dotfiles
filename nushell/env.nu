@@ -1,3 +1,6 @@
+# mode
+$env.config.edit_mode = 'vi'
+
 # carapace
 $env.CARAPACE_BRIDGES = 'zsh,fish,bash,inshellisense' # optional
 mkdir ~/.cache/carapace
