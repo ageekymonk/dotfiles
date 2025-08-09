@@ -172,8 +172,8 @@ def backup-delete-recovery-point [
 
 
 
+# S3 commands
 alias s3-list-buckets = aws-list-cmd s3api list-buckets Buckets Name
-# Extended S3 commands
 def show-bucket-versioning [] {
     let bucket = (s3-list-buckets | sk | get 0)
     aws s3api get-bucket-versioning --bucket $bucket | from json
@@ -188,6 +188,56 @@ def bucket-policy [] {
     let bucket = (s3-list-buckets | sk | get 0)
     aws s3api get-bucket-policy --bucket $bucket | from json | get Policy | from json
 }
+
+def bucket-add-clean-lifecycle-policy [
+    bucketname?: string,  # Optional bucket name (selected from list if not provided)
+    --profile: string@profiles = "",  # AWS profile to use
+    --region: string@regions = "us-east-1"  # AWS region to use
+] {
+    let buckets = if $bucketname == null {
+        aws s3api list-buckets --profile $profile --region $region | from json | get Buckets | sk --format {get Name} --multi | each {|bucket| $bucket.Name}
+
+    } else {
+        [$bucketname]
+    }
+    # Create lifecycle configuration JSON
+    let lifecycle_config = {
+        Rules: [
+            {
+                ID: "cleanup-noncurrent-versions",
+                Status: "Enabled",
+                Filter: {},
+                NoncurrentVersionExpiration: {
+                    NoncurrentDays: 1
+                }
+                Expiration: {
+                    ExpiredObjectDeleteMarker: true
+                }
+                AbortIncompleteMultipartUpload: {
+                    DaysAfterInitiation: 1
+                }
+            }
+        ]
+    }
+
+    # Save configuration to temporary file
+    let temp_file = mktemp
+    $lifecycle_config | to json | save -f $temp_file
+
+    # Apply lifecycle configuration to each bucket
+    $buckets | each {|bucket|
+        let cmd = if ($profile | is-empty) {
+            aws s3api put-bucket-lifecycle-configuration --bucket $bucket --lifecycle-configuration $"file://($temp_file)" --region $region
+        } else {
+            aws s3api put-bucket-lifecycle-configuration --bucket $bucket --lifecycle-configuration $"file://($temp_file)" --profile $profile --region $region
+        }
+        $cmd | from json
+    }
+
+    # Delete temporary file
+    rm $temp_file
+}
+
 
 def edit-bucket-policy [
     bucketname?: string,  # Optional bucket name (selected from list if not provided)
@@ -262,15 +312,15 @@ def bucket-add-tag [
 }
 
 def s3-create-notification [
---name: string = "",    # Name of the notification configuration
---bucket: string = "",   # S3 bucket name (if empty, will prompt selection)
---events: string = "s3:ObjectCreated:*",   # Event types to monitor (comma-separated)
---prefix: string = "",   # Optional prefix filter
---suffix: string = "",   # Optional suffix filter
---target-type: string@s3-notification-targets = "sns",   # Notification target type
---target-arn: string = "",   # ARN of the target (if empty, will prompt selection)
---profile: string@profiles = "",   # AWS profile to use
---region: string@regions = "us-east-1"   # AWS region to use
+    --name: string = "",    # Name of the notification configuration
+    --bucket: string = "",   # S3 bucket name (if empty, will prompt selection)
+    --events: string = "s3:ObjectCreated:*",   # Event types to monitor (comma-separated)
+    --prefix: string = "",   # Optional prefix filter
+    --suffix: string = "",   # Optional suffix filter
+    --target-type: string@s3-notification-targets = "sns",   # Notification target type
+    --target-arn: string = "",   # ARN of the target (if empty, will prompt selection)
+    --profile: string@profiles = "",   # AWS profile to use
+    --region: string@regions = "us-east-1"   # AWS region to use
 ] {
     # Select bucket if not provided
     let bucket_name = if $bucket == "" {
@@ -468,6 +518,7 @@ def datasync-task-executions-failed [] {
     where Status == "ERROR"
 }
 alias cloudwatch-list-metrics = aws-list-cmd cloudwatch list-metrics Metrics MetricName
+
 # CloudFront
 def cloudfronts [] {
     aws cloudfront list-distributions |
@@ -627,7 +678,35 @@ def efs-recovery-points [] {
 }
 alias ecr-describe-repositories = aws-list-cmd ecr describe-repositories repositories repositoryName
 alias ecs-list-clusters = aws-list-cmd ecs list-clusters clusterArns .
-alias efs-describe-file-systems = aws-list-cmd efs describe-file-systems FileSystems FileSystemId
+
+# EFS
+alias efs-list-file-systems = aws-list-cmd efs describe-file-systems FileSystems Name
+
+def efs-add-lifecycle-ia [
+    fsid?: string,  # Optional list of filesystem IDs (selected from list if not provided)
+    --profile: string@profiles = "",  # AWS profile to use
+    --region: string@regions = "us-east-1"  # AWS region to use
+] {
+    let filesystems = if $fsid == null {
+        aws efs describe-file-systems --profile $profile --region $region | from json | get FileSystems |  sk --format {get Name} --multi | each {|fs| $fs.FileSystemId }
+    } else {
+        [$fsid]
+    }
+
+    # Create lifecycle configuration for IA transition after 30 days
+    $filesystems | each {|fsid|
+        let cmd = if ($profile | is-empty) {
+            aws efs put-lifecycle-configuration --file-system-id $fsid --lifecycle-policies "TransitionToIA=AFTER_30_DAYS" --region $region
+        } else {
+            aws efs put-lifecycle-configuration --file-system-id $fsid --lifecycle-policies "TransitionToIA=AFTER_30_DAYS" --profile $profile --region $region
+        }
+
+        $cmd | from json
+        print $"Applied IA lifecycle policy to filesystem ($fsid)"
+    }
+}
+
+
 alias eks-list-clusters = aws-list-cmd eks list-clusters clusters .
 alias elasticbeanstalk-describe-applications = aws-list-cmd elasticbeanstalk describe-applications Applications ApplicationName
 # Elastic Beanstalk
@@ -1063,6 +1142,69 @@ def list-groups [] {
 }
 alias rds-describe-db-instances = aws-list-cmd rds describe-db-instances DBInstances DBInstanceIdentifier
 # Extended RDS commands
+
+def rds-stop-instances [
+    --profile: string@profiles = ""  # AWS profile to use
+    --region: string@regions = "us-east-1"  # AWS region to use
+] {
+    let instances = if ($profile | is-empty) {
+        aws rds describe-db-instances --region $region | from json | get DBInstances | where DBInstanceStatus == "available"
+    } else {
+        aws rds describe-db-instances --profile $profile --region $region | from json | get DBInstances | where DBInstanceStatus == "available"
+    }
+
+    let selected_instances = ($instances | each {|instance| [
+        $instance.DBInstanceIdentifier,
+        $instance.Engine,
+        $instance.DBInstanceClass,
+        $instance.DBInstanceStatus
+    ]} | sk --multi)
+
+    $selected_instances | each {|instance|
+        let db_id = $instance.0
+        print $"Stopping RDS instance: ($db_id)"
+
+        let cmd = if ($profile | is-empty) {
+            aws rds stop-db-instance --db-instance-identifier $db_id --region $region
+        } else {
+            aws rds stop-db-instance --db-instance-identifier $db_id --profile $profile --region $region
+        }
+
+        $cmd | from json
+    }
+}
+
+def rds-stop-clusters [
+    --profile: string@profiles = ""  # AWS profile to use
+    --region: string@regions = "us-east-1"  # AWS region to use
+] {
+    let clusters = if ($profile | is-empty) {
+        aws rds describe-db-clusters --region $region | from json | get DBClusters | where Status == "available"
+    } else {
+        aws rds describe-db-clusters --profile $profile --region $region | from json | get DBClusters | where Status == "available"
+    }
+
+    let selected_clusters = ($clusters | each {|cluster| [
+        $cluster.DBClusterIdentifier,
+        $cluster.Engine,
+        $cluster.EngineVersion,
+        $cluster.Status
+    ]} | sk --multi)
+
+    $selected_clusters | each {|cluster|
+        let cluster_id = $cluster.0
+        print $"Stopping RDS cluster: ($cluster_id)"
+
+        let cmd = if ($profile | is-empty) {
+            aws rds stop-db-cluster --db-cluster-identifier $cluster_id --region $region
+        } else {
+            aws rds stop-db-cluster --db-cluster-identifier $cluster_id --profile $profile --region $region
+        }
+
+        $cmd | from json
+    }
+}
+
 def rds-instance-add-tag [
     name: string,  # Tag name
     value: string  # Tag value
