@@ -7,6 +7,9 @@
 // custom settings, run `zed: open default settings` from the
 // command palette (cmd-shift-p / ctrl-shift-p)
 {
+  "features": {
+    "edit_prediction_provider": "copilot"
+  },
   "edit_predictions": {
     "mode": "eager",
     "copilot": {
@@ -19,33 +22,27 @@
     "default_profile": "ask",
     "inline_assistant_model": {
       "provider": "copilot_chat",
-      "model": "claude-3.7-sonnet"
+      "model": "claude-sonnet-4"
     },
     "always_allow_tool_actions": true,
     "default_model": {
       "provider": "copilot_chat",
       "model": "claude-3.7-sonnet"
-    },
-    "version": "2"
+    }
   },
   "context_servers": {
     "awslabs.eks-mcp-server": {
-      "command": {
-        "path": "uvx",
-        "args": [
-          "awslabs.eks-mcp-server@latest",
-          "--allow-write",
-          "--allow-sensitive-data-access"
-        ],
-        "env": {
-          "FASTMCP_LOG_LEVEL": "ERROR",
-          "AWS_PROFILE": "default",
-          "AWS_REGION": "ap-southeast-2"
-        }
-      },
-      "settings": {
-        "transportType": "stdio",
-        "autoApprove": []
+      "source": "custom",
+      "command": "uvx",
+      "args": [
+        "awslabs.eks-mcp-server@latest",
+        "--allow-write",
+        "--allow-sensitive-data-access"
+      ],
+      "env": {
+        "FASTMCP_LOG_LEVEL": "ERROR",
+        "AWS_PROFILE": "default",
+        "AWS_REGION": "ap-southeast-2"
       }
     }
   },
