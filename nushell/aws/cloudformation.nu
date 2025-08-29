@@ -2,16 +2,16 @@ alias cloudformation-list-stacks = aws-list-cmd cloudformation list-stacks Stack
 alias cloudformation-list-stacksets = aws-list-cmd cloudformation list-stack-sets Summaries StackSetName
 
 def cloudformation-get-stackset-details [
-    --profile: string = ""  # AWS profile to use
-    --region: string  = "us-east-1" # AWS Region to use
+    --profile: string@profiles = ""  # AWS profile to use
+    --region: string@regions = "us-east-1" # AWS Region to use
 ] {
     let stackset = (cloudformation-list-stacksets --profile $profile --region $region | sk | get StackSetName)
     aws cloudformation describe-stack-set --profile $profile --region $region --stack-set-name $stackset | from json
 }
 
 def cloudformation-update-stackset [
-    --profile: string = ""  # AWS profile to use
-    --region: string  = "us-east-1" # AWS Region to use
+    --profile: string@profiles = ""  # aws profile to use
+    --region: string@regions = "us-east-1" # aws region to use
 ] {
     let fname = (gum file)
     if $fname != null {
@@ -21,8 +21,8 @@ def cloudformation-update-stackset [
 }
 
 def cloudformation-delete-stack-from-stackset [
-    --profile: string = ""  # AWS profile to use
-    --region: string  = "us-east-1" # AWS Region to use
+    --profile: string@profiles = ""  # AWS profile to use
+    --region: string@regions  = "us-east-1" # AWS Region to use
 ] {
     let stackset = (cloudformation-list-stacksets --profile $profile --region $region | sk | get StackSetName)
     let instances = (cloudformation-get-stackset-instances --profile $profile --region $region | sk | split row " " | get 0 | str join " ")
@@ -32,16 +32,16 @@ def cloudformation-delete-stack-from-stackset [
 }
 
 def cloudformation-delete-stackset [
-    --profile: string = ""  # AWS profile to use
-    --region: string  = "us-east-1" # AWS Region to use
+    --profile: string@profiles = ""  # AWS profile to use
+    --region: string@regions  = "us-east-1" # AWS Region to use
 ] {
     let stackset = (cloudformation-list-stacksets --profile $profile --region $region | sk | get StackSetName)
     aws cloudformation delete-stack-set --profile $profile --region $region --stack-set-name $stackset | from json
 }
 
 def cloudformation-get-stackset-instances [
-    --profile: string = ""  # AWS profile to use
-    --region: string  = "us-east-1" # AWS Region to use
+    --profile: string@profiles = ""  # AWS profile to use
+    --region: string@regions  = "us-east-1" # AWS Region to use
 ] {
     let stackset = cloudformation-list-stacksets --profile $profile --region $region
     aws cloudformation list-stack-instances --profile $profile --region $region --stack-set-name $stackset.StackSetName |
@@ -50,8 +50,8 @@ def cloudformation-get-stackset-instances [
 }
 
 def cloudformation-update-stack [
-    --profile: string = ""  # AWS profile to use
-    --region: string  = "us-east-1" # AWS Region to use
+    --profile: string@profiles = ""  # AWS profile to use
+    --region: string@regions  = "us-east-1" # AWS Region to use
 ] {
     let fname = (gum file)
     if $fname != null {
@@ -61,8 +61,8 @@ def cloudformation-update-stack [
 }
 
 def cloudformation-create-stack [
-    --profile: string = ""  # AWS profile to use
-    --region: string  = "us-east-1" # AWS Region to use
+    --profile: string@profiles = ""  # AWS profile to use
+    --region: string@regions  = "us-east-1" # AWS Region to use
 ] {
     let fname = (gum file)
     if $fname != null {
@@ -72,16 +72,16 @@ def cloudformation-create-stack [
 }
 
 def cloudformation-delete-stack [
-    --profile: string = ""  # AWS profile to use
-    --region: string  = "us-east-1" # AWS Region to use
+    --profile: string@profiles = ""  # AWS profile to use
+    --region: string@regions  = "us-east-1" # AWS Region to use
 ] {
     let stack = (cloudformation-list-stacks --profile $profile --region $region | sk | get StackName)
     aws cloudformation delete-stack --profile $profile --region $region --stack-name $stack | from json
 }
 
 def cloudformation-get-stack-details [
-    --profile: string = ""  # AWS profile to use
-    --region: string  = "us-east-1" # AWS Region to use
+    --profile: string@profiles = ""  # AWS profile to use
+    --region: string@regions  = "us-east-1" # AWS Region to use
 ] {
     let stack = (cloudformation-list-stacks --profile $profile --region $region | sk | get StackName)
     aws cloudformation describe-stacks --profile $profile --region $region --stack-name $stack | from json

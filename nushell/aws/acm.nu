@@ -18,16 +18,17 @@ def acm-import-cert [
     --profile: string@profiles = ""  # AWS profile to use
     --region: string@regions = "us-east-1" # AWS Region to use
 ] {
-    let certfile = (gum file)
+    let certfile = (gum file --header "Select the certificate file (.crt)")
     let certfilepem = ($certfile) | str replace ".crt" ".pem"
-    let key = (gum file)
+    let key = (gum file --header "Select the private key file (.key)")
+    let certchain = (gum file --header "Select the certificate chain file (.crt), press Enter to skip")
     # Extract lines between first Begin and End
     ^sed '/-----BEGIN CERTIFICATE-----/,/-----END CERTIFICATE-----/!d;/-----END CERTIFICATE-----/q' $certfile | save -f ($certfilepem)
 
     let cmd = if ($profile | is-empty) {
-        aws acm import-certificate --certificate fileb://($certfilepem) --private-key fileb://($key) --region $region
+        aws acm import-certificate --certificate fileb://($certfilepem) --private-key fileb://($key) --certificate-chain fileb://($certchain) --region $region
     } else {
-        aws acm import-certificate --certificate fileb://($certfilepem) --private-key fileb://($key) --profile $profile --region $region
+        aws acm import-certificate --certificate fileb://($certfilepem) --private-key fileb://($key) --certificate-chain fileb://($certchain) --profile $profile --region $region
     }
 
     $cmd | from json
