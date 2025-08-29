@@ -96,5 +96,7 @@ $env.config.hooks.env_change.PWD = (
 
 use ($nu.default-config-dir | path join mise.nu)
 $env.PATH = ($env.PATH | split row (char esep) | append "~/.nix-profile/bin" | append "~/.ghcup/bin")
+
+source aws/aws.nu
 source alias.nu
 source k.nu
