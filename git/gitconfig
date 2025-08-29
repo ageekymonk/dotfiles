@@ -160,13 +160,12 @@
 [interactive]
   diffFilter = diff-highlight
 
-[credential]
-	helper = store
-	helper = /usr/local/share/gcm-core/git-credential-manager
 [maintenance]
   strategy = incremental
+
 [credential "https://dev.azure.com"]
 	useHttpPath = true
+
 [alias]
 	co = checkout
 	br = branch

@@ -44,3 +44,8 @@ lazy-lock.json
 
 git/gitconfig
 nushell/vendor/autoload/*
+
+carapace/bridge/bash/*
+carapace/bridge/zsh/*
+
+zed/settings_backup.json
