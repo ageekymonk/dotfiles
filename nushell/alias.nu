@@ -756,27 +756,6 @@ def create-iam-policy [
     }
 }
 
-def attach-iam-policy [
-    rolename?: string    # Role name
-    policyname?: string  # Policy name
-    --profile: string    # AWS profile to use
-] {
-    let role_name = if $rolename == null { iam-list-roles --profile $profile | sk | split row " " | get 0 } else { $rolename }
-    let policy_name = if $policyname == null { list-iam-policy | sk | split row " " | get 0 } else { $policyname }
-
-    let policy_arn = if $profile == null {
-        aws iam list-policies --query $"Policies[?PolicyName=='($policy_name)'].Arn" --output text | str trim
-    } else {
-        aws iam list-policies --profile $profile --query $"Policies[?PolicyName=='($policy_name)'].Arn" --output text | str trim
-    }
-
-    if $profile == null {
-        aws iam attach-role-policy --role-name $role_name --policy-arn $policy_arn | from json
-    } else {
-        aws iam attach-role-policy --role-name $role_name --policy-arn $policy_arn --profile $profile | from json
-    }
-}
-
 def list-iam-policy [] {
     gum spin --title "Fetching IAM Policies" -- aws iam list-policies |
     from json |
@@ -911,6 +890,190 @@ def edit-iam-role-trust-policy [
     } else {
         aws iam update-assume-role-policy --role-name $rolename --policy-document $policy --profile $profile --region $region | from json
     }
+}
+
+def add-policy-to-role [
+    --role-name: string = "",  # Role name (optional, will prompt if not provided)
+    --policy-arn: string = "",  # Policy ARN (optional, will prompt if not provided)
+    --profile: string@profiles = "",  # AWS profile to use
+    --region: string@regions = "us-east-1"  # AWS region to use
+] {
+    let role = if $role_name == "" {
+        iam-list-roles --profile $profile --region $region | get RoleName
+    } else {
+        $role_name
+    }
+
+    let policy = if $policy_arn == "" {
+        # List AWS managed policies and customer managed policies
+        let cmd_list = if ($profile | is-empty) {
+            aws iam list-policies --max-items 1000 --region $region
+        } else {
+            aws iam list-policies --max-items 1000 --profile $profile --region $region
+        }
+
+        ($cmd_list | from json | get Policies | each {|p| [
+            $p.PolicyName,
+            $p.Arn,
+        ]} | sk | get 1)
+    } else {
+        $policy_arn
+    }
+
+    # Attach the policy to the role
+    let cmd = if ($profile | is-empty) {
+        aws iam attach-role-policy --role-name $role --policy-arn $policy --region $region
+    } else {
+        aws iam attach-role-policy --role-name $role --policy-arn $policy --profile $profile --region $region
+    }
+
+    $cmd | from json
+    print $"Successfully attached policy ($policy) to role ($role)"
+}
+
+def add-inline-policy-to-role [
+    --role-name: string = "",  # Role name (optional, will prompt if not provided)
+    --policy-name: string = "",  # Policy name (optional, will prompt if not provided)
+    --policy-document: string = "",  # Policy document as JSON string (optional, will prompt for file if not provided)
+    --policy-file: string = "",  # Path to policy file (optional)
+    --profile: string@profiles = "",  # AWS profile to use
+    --region: string@regions = "us-east-1"  # AWS region to use
+] {
+    let role = if $role_name == "" {
+        iam-list-roles --profile $profile --region $region | get RoleName
+    } else {
+        $role_name
+    }
+
+    let policy_name_final = if $policy_name == "" {
+        gum input --placeholder "Policy Name"
+    } else {
+        $policy_name
+    }
+
+    let policy_doc = if $policy_document != "" {
+        # Validate JSON string before using it
+        #
+        print $policy_document
+        if ($policy_document | from json | to json) != null {
+            $policy_document
+        } else {
+            error make {msg: "Invalid JSON in policy document"}
+        }
+    } else if $policy_file != "" {
+        open $policy_file | to json -r
+    } else {
+        let file_path = (gum file)
+        open $file_path | to json -r
+    }
+
+    # Add the inline policy to the role
+    let cmd = if ($profile | is-empty) {
+        aws iam put-role-policy --role-name $role --policy-name $policy_name_final --policy-document $policy_doc --region $region
+    } else {
+        aws iam put-role-policy --role-name $role --policy-name $policy_name_final --policy-document $policy_doc --profile $profile --region $region
+    }
+
+    $cmd | from json
+    print $"Successfully added inline policy ($policy_name_final) to role ($role)"
+}
+
+def create-iam-role-with-role-trust [
+    role_name?: string,  # Role name
+    trusted_role_arn?: string,  # ARN of the role to trust
+    --profile: string@profiles = "",  # AWS profile to use
+    --region: string@regions = "us-east-1"  # AWS region to use
+] {
+    let role = if $role_name == null {
+        gum input --placeholder "Role Name"
+    } else {
+        $role_name
+    }
+
+    let trusted_arn = if $trusted_role_arn == null {
+        gum input --placeholder "Trusted Role ARN"
+    } else {
+        $trusted_role_arn
+    }
+
+    # Create trust policy JSON for role-based trust
+    let trust_policy = {
+        Version: "2012-10-17",
+        Statement: [
+            {
+                Effect: "Allow",
+                Principal: {
+                    AWS: $trusted_arn
+                },
+                Action: "sts:AssumeRole"
+            }
+        ]
+    }
+
+    # Save trust policy to temporary file
+    let temp_file = mktemp
+    $trust_policy | to json | save -f $temp_file
+
+    # Create the role
+    let cmd = if ($profile | is-empty) {
+        aws iam create-role --role-name $role --assume-role-policy-document $"file://($temp_file)" --region $region
+    } else {
+        aws iam create-role --role-name $role --assume-role-policy-document $"file://($temp_file)" --profile $profile --region $region
+    }
+
+    # Clean up temporary file
+    rm $temp_file
+
+    $cmd | from json
+}
+
+def create-iam-role-with-service-trust [
+    role_name?: string,  # Role name
+    service_name?: string,  # AWS service name (e.g., lambda, ec2, ecs-tasks)
+    --profile: string@profiles = "",  # AWS profile to use
+    --region: string@regions = "us-east-1"  # AWS region to use
+] {
+    let role = if $role_name == null {
+        gum input --placeholder "Role Name"
+    } else {
+        $role_name
+    }
+
+    let service = if $service_name == null {
+        gum input --placeholder "AWS Service Name (e.g., lambda, ec2, ecs-tasks)"
+    } else {
+        $service_name
+    }
+
+    # Create trust policy JSON
+    let trust_policy = {
+        Version: "2012-10-17",
+        Statement: [
+            {
+                Effect: "Allow",
+                Principal: {
+                    Service: $"($service).amazonaws.com"
+                },
+                Action: "sts:AssumeRole"
+            }
+        ]
+    }
+
+    # Save trust policy to temporary file
+    let temp_file = mktemp
+    $trust_policy | to json | save -f $temp_file
+
+    # Create the role
+    let cmd = if ($profile | is-empty) {
+        aws iam create-role --role-name $role --assume-role-policy-document $"file://($temp_file)" --region $region
+    } else {
+        aws iam create-role --role-name $role --assume-role-policy-document $"file://($temp_file)" --profile $profile --region $region
+    }
+
+    # Clean up temporary file
+    rm $temp_file
+
+    $cmd | from json
 }
 
 def iam-policy [] {
