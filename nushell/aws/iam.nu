@@ -1,8 +1,9 @@
 alias iam-list-roles = aws-list-cmd iam list-roles Roles RoleName
 alias iam-list-users = aws-list-cmd iam list-users Users UserName
+alias iam-list-policies = aws-list-cmd iam list-policies Policies PolicyName
 
 # Extended IAM commands
-def create-iam-policy [
+def iam-create-policy [
     policyname?: string  # Policy name
     fname?: string       # Filename with policy JSON
     --profile: string    # AWS profile to use
@@ -17,18 +18,7 @@ def create-iam-policy [
     }
 }
 
-def list-iam-policy [] {
-    gum spin --title "Fetching IAM Policies" -- aws iam list-policies |
-    from json |
-    get Policies |
-    each {|policy| [
-        $policy.PolicyName,
-        $policy.Arn
-    ]} |
-    sort-by PolicyName
-}
-
-def edit-iam-role-inline-policy [
+def iam-edit-role-inline-policy [
     --profile: string@profiles = ""  # AWS profile to use
     --region: string@regions = "us-east-1"  # AWS region to use
 ] {
@@ -48,7 +38,6 @@ def edit-iam-role-inline-policy [
         aws iam get-role-policy --role-name $rolename --policy-name $inline_policy --profile $profile --region $region
     }
 
-    $env.EDITOR = "code -w"
     let policy = ($cmd_get |
         from json |
         get PolicyDocument |
@@ -62,22 +51,41 @@ def edit-iam-role-inline-policy [
     }
 }
 
-def edit-iam-policy [] {
-    let policyarn = (list-iam-policy | sk | get 1)
-    let version_id = (aws iam get-policy --policy-arn $policyarn | from json | get Policy.DefaultVersionId)
+def iam-edit-policy [
+    --profile: string@profiles = ""  # AWS profile to use
+    --region: string@regions = "us-east-1"  # AWS region to use
+] {
+    let policyarn = (iam-list-policies --profile $profile --region $region | get Arn)
 
-    let policy = (aws iam get-policy-version --policy-arn $policyarn --version-id $version_id |
+    let cmd_get_policy = if ($profile | is-empty) {
+        aws iam get-policy --policy-arn $policyarn --region $region
+    } else {
+        aws iam get-policy --policy-arn $policyarn --profile $profile --region $region
+    }
+    let version_id = ($cmd_get_policy | from json | get Policy.DefaultVersionId)
+
+    let cmd_get_version = if ($profile | is-empty) {
+        aws iam get-policy-version --policy-arn $policyarn --version-id $version_id --region $region
+    } else {
+        aws iam get-policy-version --policy-arn $policyarn --version-id $version_id --profile $profile --region $region
+    }
+
+    let policy = ($cmd_get_version |
         from json |
         get PolicyVersion.Document |
         to json -i 2 |
-        ^code - |
-        from json |
-        to json -r)
+        vipe)
 
-    aws iam create-policy-version --policy-arn $policyarn --policy-document $policy --set-as-default | from json
+    let cmd_create = if ($profile | is-empty) {
+        aws iam create-policy-version --policy-arn $policyarn --policy-document $policy --set-as-default --region $region
+    } else {
+        aws iam create-policy-version --policy-arn $policyarn --policy-document $policy --set-as-default --profile $profile --region $region
+    }
+
+    $cmd_create | from json
 }
 
-def clone-iam-role [] {
+def iam-clone-role [] {
     let rolename = (list-iam-roles | sk | get 0)
     let newrolename = (gum input --placeholder "New Role Name")
 
@@ -99,7 +107,7 @@ def clone-iam-role [] {
     }
 }
 
-def clone-iam-role-cross-account [
+def iam-clone-role-cross-account [
     src_account?: string  # Source AWS profile
     dest_account?: string # Destination AWS profile
 ] {
@@ -127,7 +135,7 @@ def clone-iam-role-cross-account [
     }
 }
 
-def edit-iam-role-trust-policy [
+def iam-edit-role-trust-policy [
     --profile: string@profiles = "",  # AWS profile to use
     --region: string@regions = "us-east-1"  # AWS region to use
 ] {

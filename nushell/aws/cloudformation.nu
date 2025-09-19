@@ -5,7 +5,7 @@ def cloudformation-get-stackset-details [
     --profile: string@profiles = ""  # AWS profile to use
     --region: string@regions = "us-east-1" # AWS Region to use
 ] {
-    let stackset = (cloudformation-list-stacksets --profile $profile --region $region | sk | get StackSetName)
+    let stackset = (cloudformation-list-stacksets --profile $profile --region $region | get StackSetName)
     aws cloudformation describe-stack-set --profile $profile --region $region --stack-set-name $stackset | from json
 }
 

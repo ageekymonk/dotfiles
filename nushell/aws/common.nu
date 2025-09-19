@@ -1,3 +1,4 @@
+$env.EDITOR = "nvim"
 # profiles
 def profiles [] {
     aws configure list-profiles | lines

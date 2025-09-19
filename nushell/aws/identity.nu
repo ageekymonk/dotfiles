@@ -39,8 +39,7 @@ def show-permission-sets-inline-policy [] {
     from json |
     get InlinePolicy |
     from json |
-    to json -i 2 |
-    ^code -
+    to json -i 2
 }
 
 def edit-permission-sets-inline-policy [
@@ -53,9 +52,9 @@ def edit-permission-sets-inline-policy [
         aws sso-admin list-instances --profile $profile --region $region
     }
 
-    let instance_store_id = (bkt --ttl=1y -- $cmd_list_instances --query "Instances[0].IdentityStoreId" | str trim)
-    let instance_store_arn = (bkt --ttl=1y -- $cmd_list_instances | from json | get Instances.0.InstanceArn)
-    let permission_set = (list-permission-sets | sk | split row " " | get 1)
+    let instance_store_id = ($cmd_list_instances | from json | get Instances.0.IdentityStoreId)
+    let instance_store_arn = ($cmd_list_instances | from json | get Instances.0.InstanceArn)
+    let permission_set = (list-permission-sets --profile $profile --region $region | sk | get 1)
 
     let cmd_get = if ($profile | is-empty) {
         aws sso-admin get-inline-policy-for-permission-set --instance-arn $instance_store_arn --permission-set-arn $permission_set --region $region
@@ -63,7 +62,6 @@ def edit-permission-sets-inline-policy [
         aws sso-admin get-inline-policy-for-permission-set --instance-arn $instance_store_arn --permission-set-arn $permission_set --profile $profile --region $region
     }
 
-    $env.EDITOR = "code -w"
     let policy = ($cmd_get |
         from json |
         get InlinePolicy |
@@ -87,7 +85,7 @@ def edit-permission-sets-inline-policy [
     $cmd_provision | from json
 }
 
-def create-permission-set [
+def sso-create-permission-set [
     --name: string = "",  # Permission set name
     --description: string = "",  # Permission set description
     --duration: int = 3600,  # Session duration in seconds (1-12 hours)
@@ -209,7 +207,7 @@ def attach-policy-to-permission-set [
     print $"Attached policy ($policy_arn_final) to permission set"
 }
 
-def list-groups [
+def identity-list-groups [
     --profile: string@profiles = ""  # AWS profile to use
     --region: string@regions = "us-east-1"  # AWS region to use
 ] {
