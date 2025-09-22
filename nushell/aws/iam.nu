@@ -147,7 +147,6 @@ def iam-edit-role-trust-policy [
         aws iam get-role --role-name $rolename --profile $profile --region $region
     }
 
-    $env.EDITOR = "code -w"
     let policy = ($cmd_get |
         from json |
         get Role.AssumeRolePolicyDocument |

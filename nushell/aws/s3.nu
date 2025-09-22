@@ -88,7 +88,6 @@ def s3-edit-bucket-policy [
         aws s3api get-bucket-policy --bucket $bucket --profile $profile --region $region
     }
 
-    $env.EDITOR = "code -w"
     let policy = (
         $cmd_get |
         from json |
