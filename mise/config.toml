@@ -1,0 +1,12 @@
+[tools]
+node = "22"
+"npm:@google/gemini-cli" = "latest"
+"npm:aws-azure-login" = "latest"
+terraform = "1.12"
+"github:kubernetes-sigs/krew" = "latest"
+
+[settings]
+idiomatic_version_file_enable_tools = ["ruby"]
+
+[settings.ruby]
+ruby_build_opts = "CC=gcc-14 CXX=g++-14"
