@@ -80,6 +80,8 @@ brew "minikube"
 brew "mise"
 # Collection of tools that nobody wrote when UNIX was young
 brew "moreutils"
+# Neovim
+brew "neovim"
 # Port scanning utility for large networks
 brew "nmap"
 # Modern shell for the GitHub era
