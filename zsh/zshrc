@@ -158,3 +158,8 @@ zstyle ':completion:*' format $'\e[2;37mCompleting %d\e[m'
 
 source <(carapace _carapace)
 eval "$(mise activate zsh)"
+
+# Added by LM Studio CLI (lms)
+export PATH="$PATH:/Users/private/.lmstudio/bin"
+# End of LM Studio CLI section
+
