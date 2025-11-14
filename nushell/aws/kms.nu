@@ -1,4 +1,5 @@
 alias kms-list-keys = aws-list-cmd kms list-aliases Aliases AliasName
+alias kms-select-keys = aws-list-cmd kms list-aliases Aliases AliasName --multiple "true"
 # Extended KMS commands
 
 def kms-edit-key-policy [

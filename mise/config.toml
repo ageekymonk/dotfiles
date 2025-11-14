@@ -2,7 +2,7 @@
 node = "22"
 "npm:@google/gemini-cli" = "latest"
 "npm:aws-azure-login" = "latest"
-terraform = "1.12"
+terraform = "1.13"
 "github:kubernetes-sigs/krew" = "latest"
 
 [settings]

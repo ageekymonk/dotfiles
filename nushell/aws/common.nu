@@ -23,6 +23,7 @@ def aws-list-cmd [
     PrimaryKey: string # Json Primary key in the array
     --profile: string@profiles = "" # AWS profile to use
     --region: string@regions = "us-east-1" # AWS region to use
+    --multiple: string = ""
 ] {
     let cmd = if ($profile | is-empty) {
         aws $servicename $actionname --region $region
@@ -30,5 +31,9 @@ def aws-list-cmd [
         aws $servicename $actionname --profile $profile --region $region
     }
 
-    $cmd | from json | get $ResponseKey | sk --format {get $PrimaryKey} --preview {}
+    if ($multiple | is-empty) {
+        $cmd | from json | get $ResponseKey | sk --format {get $PrimaryKey} --preview {}
+    } else {
+        $cmd | from json | get $ResponseKey | sk -m --format {get $PrimaryKey} --preview {}
+    }
 }

@@ -163,3 +163,5 @@ eval "$(mise activate zsh)"
 export PATH="$PATH:/Users/private/.lmstudio/bin"
 # End of LM Studio CLI section
 
+[[ "$TERM_PROGRAM" == "kiro" ]] && . "$(kiro --locate-shell-integration-path zsh)"
+
