@@ -20,7 +20,7 @@ brew "azure-cli"
 brew "bat"
 # CLI utility for caching the output of subprocesses
 brew "bkt"
-# autocomplete 
+# autocomplete
 brew "carapace"
 # Cut, copy, and paste anything, anywhere, all from the terminal
 brew "clipboard"
@@ -80,7 +80,7 @@ brew "minikube"
 brew "mise"
 # Collection of tools that nobody wrote when UNIX was young
 brew "moreutils"
-# Neovim
+# neovim
 brew "neovim"
 # Port scanning utility for large networks
 brew "nmap"
@@ -104,7 +104,7 @@ brew "tabiew"
 brew "trufflehog"
 # smart cd
 brew "zoxide"
-# zx 
+# zx
 brew "zx"
 # A cross-platform, cli app to perform various string operations.
 brew "abhimanyu003/sttr/sttr"
