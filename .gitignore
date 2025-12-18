@@ -53,3 +53,15 @@ awesome/bling
 awesome/freedesktop
 awesome/lain
 awesome/layout-machi
+
+gemini/tmp
+gemini/google_accounts.json
+gemini/oauth_creds.json
+gemini/state.json
+gemini/user_id
+gemini/antigravity/implicit
+gemini/antigravity/brain
+gemini/antigravity/code_tracker
+gemini/antigravity/conversations
+gemini/antigravity/user_settings.pb
+gemini/antigravity/installation_id

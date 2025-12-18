@@ -7,6 +7,7 @@ deno = "latest"
 "npm:aws-azure-login" = "latest"
 terraform = "1.13"
 "github:kubernetes-sigs/krew" = "latest"
+"pipx:browsr" = { version = "latest", extras = "all" }
 
 [settings]
 idiomatic_version_file_enable_tools = ["ruby"]

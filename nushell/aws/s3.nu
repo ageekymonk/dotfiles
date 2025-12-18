@@ -213,7 +213,7 @@ def s3-create-notification [
     mut configrecord = $cmd | from json
     if $target_type == "sns" {
         $config.TopicArn = $target
-        let topicconfig = $configrecord | get -i TopicConfigurations
+        let topicconfig = $configrecord | get -o TopicConfigurations
         $configrecord = if $topicconfig == null {
             $configrecord | insert TopicConfigurations  [$config]
         } else {
@@ -221,7 +221,7 @@ def s3-create-notification [
         }
     } else if $target_type == "sqs" {
         $config.QueueArn = $target
-        let topicconfig = $configrecord | get -i QueueConfigurations
+        let topicconfig = $configrecord | get -o QueueConfigurations
         $configrecord = if $topicconfig == null {
             print "Adding Queue"
             $configrecord | insert QueueConfigurations  $config
@@ -230,7 +230,7 @@ def s3-create-notification [
         }
     } else if $target_type == "lambda" {
         $config.LambdaFunctionArn = $target
-        let topicconfig = $configrecord | get -i LambdaFunctionConfigurations
+        let topicconfig = $configrecord | get -o LambdaFunctionConfigurations
         $configrecord = if $topicconfig == null {
             $configrecord | insert LambdaFunctionConfigurations  [$config]
         } else {

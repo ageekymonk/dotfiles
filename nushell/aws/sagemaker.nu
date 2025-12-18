@@ -35,7 +35,7 @@ def sagemaker-clone-notebook [
         $type
     }
 
-    let platform_identifier = if $type == "" {
+    let platform_identifier = if $platform_identifier == "" {
         $details.PlatformIdentifier
     } else {
         $platform_identifier
@@ -51,7 +51,8 @@ def sagemaker-clone-notebook [
             --security-group-ids ($details.SecurityGroups | default [])
             --volume-size-in-gb $details.VolumeSizeInGB
             --root-access $details.RootAccess
-            --kms-key-id $details.KmsKeyId
+            --kms-key-id ($details.KmsKeyId? | default "")
+            --lifecycle-config-name $details.NotebookInstanceLifecycleConfigName
             --direct-internet-access $details.DirectInternetAccess
             --platform-identifier $platform_identifier
             --region $region)
@@ -64,7 +65,8 @@ def sagemaker-clone-notebook [
             --security-group-ids ...($details.SecurityGroups | default [])
             --volume-size-in-gb $details.VolumeSizeInGB
             --root-access $details.RootAccess
-            --kms-key-id $details.KmsKeyId
+            --kms-key-id ($details.KmsKeyId? | default "")
+            --lifecycle-config-name $details.NotebookInstanceLifecycleConfigName
             --direct-internet-access $details.DirectInternetAccess
             --platform-identifier $platform_identifier
             --profile $profile
@@ -74,12 +76,26 @@ def sagemaker-clone-notebook [
     $cmd_create | from json | echo $"Cloned notebook ($source_notebook) to ($new_name)"
 }
 
-def sagemaker-notebook-stop [] {
-    let notebook_name = (sagemaker-notebooks | sk | get 0)
+def sagemaker-notebook-stop [
+    --profile: string@profiles = "",  # AWS profile to use
+    --region: string@regions = "us-east-1",  # AWS region to use
+] {
+    let notebook_name = (sagemaker-list-notebooks --profile $profile --region $region | get NotebookInstanceName)
     aws sagemaker stop-notebook-instance --notebook-instance-name $notebook_name | from json
 }
 
-def sagemaker-notebook-start [] {
-    let notebook_name = (sagemaker-notebooks | sk | get 0)
+def sagemaker-notebook-start [
+    --profile: string@profiles = "",  # AWS profile to use
+    --region: string@regions = "us-east-1",  # AWS region to use
+] {
+    let notebook_name = (sagemaker-list-notebooks --profile $profile --region $region | get NotebookInstanceName)
     aws sagemaker start-notebook-instance --notebook-instance-name $notebook_name | from json
 }
+
+def sagemaker-notebook-delete [
+    --profile: string@profiles = "",  # AWS profile to use
+    --region: string@regions = "us-east-1",  # AWS region to use
+] {
+    let notebook_name = (sagemaker-list-notebooks --profile $profile --region $region | get NotebookInstanceName)
+    aws sagemaker delete-notebook-instance --notebook-instance-name $notebook_name --profile $profile --region $region | from json
+}       

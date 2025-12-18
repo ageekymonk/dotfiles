@@ -364,8 +364,8 @@ binds {
     ISO_Level5_Shift+f { spawn "nautilus" "--new-window"; }
     Super+Space { spawn "rofi" "-combi-modes" "drun,window" "-theme" "solarized" "-show" "combi"; }
     Super+Alt+L { spawn "swaylock"; }
-    F1 { spawn "clapboard"; }
-    F3 { spawn "waybar"; }
+    F1 { spawn "ghostty"; }
+
 
     // You can also use a shell. Do this if you need pipes, multiple commands, etc.
     // Note: the entire command goes as a single argument in the end.

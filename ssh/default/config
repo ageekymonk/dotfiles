@@ -19,4 +19,7 @@ Host ssh.dev.azure.com
 Host i-* mi-*
      ProxyCommand sh -c "aws ssm start-session --target %h --document-name AWS-StartSSHSession --parameters 'portNumber=%p'"
 
-# Work Hosts
+Host  10.*
+    PubkeyAcceptedKeyTypes=+ssh-rsa
+    HostKeyAlgorithms=+ssh-rsa
+    StrictHostKeyChecking no

@@ -1,0 +1,23 @@
+{
+  "tools": {
+    "shell": {
+      "showColor": true
+    }
+  },
+  "general": {
+    "preferredEditor": "nvim",
+    "vimMode": true
+  },
+  "security": {
+    "auth": {
+      "selectedType": "oauth-personal"
+    }
+  },
+  "ui": {
+    "theme": "Dracula"
+  },
+  "hasSeenIdeIntegrationNudge": true,
+  "ide": {
+    "enabled": true
+  }
+}

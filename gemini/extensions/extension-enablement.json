@@ -1,0 +1,7 @@
+{
+  "mcp-server-kubernetes": {
+    "overrides": [
+      "/home/ramz/*"
+    ]
+  }
+}
