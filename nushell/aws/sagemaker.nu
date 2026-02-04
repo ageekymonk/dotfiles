@@ -1,7 +1,12 @@
 # SageMaker
 alias sagemaker-list-notebooks = aws-list-cmd sagemaker list-notebook-instances NotebookInstances NotebookInstanceName
+alias sagemaker-list-lifecycle = aws-list-cmd sagemaker list-notebook-instance-lifecycle-configs NotebookInstanceLifecycleConfigs NotebookInstanceLifecycleConfigName
 
-alias sagemaker-list-notebooks = aws-list-cmd sagemaker list-notebook-instances NotebookInstances NotebookInstanceName
+alias sagemaker-list-models = aws-list-cmd sagemaker list-models Models ModelName
+alias sagemaker-list-endpoints = aws-list-cmd sagemaker list-endpoints Endpoints EndpointName
+alias sagemaker-list-endpoint-configs = aws-list-cmd sagemaker list-endpoint-configs EndpointConfigs EndpointConfigName
+alias sagemaker-list-training-jobs = aws-list-cmd sagemaker list-training-jobs TrainingJobSummaries TrainingJobName
+alias sagemaker-list-processing-jobs = aws-list-cmd sagemaker list-processing-jobs ProcessingJobSummaries ProcessingJobName
 
 def sagemaker-clone-notebook [
     --profile: string@profiles = "",  # AWS profile to use
