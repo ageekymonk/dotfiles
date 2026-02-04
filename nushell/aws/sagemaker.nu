@@ -104,3 +104,4 @@ def sagemaker-notebook-delete [
     let notebook_name = (sagemaker-list-notebooks --profile $profile --region $region | get NotebookInstanceName)
     aws sagemaker delete-notebook-instance --notebook-instance-name $notebook_name --profile $profile --region $region | from json
 }       
+

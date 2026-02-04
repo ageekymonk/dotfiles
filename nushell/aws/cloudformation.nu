@@ -67,7 +67,7 @@ def cloudformation-create-stack [
     let fname = (gum file)
     if $fname != null {
         let stackname = (gum input --placeholder "Stack Name")
-        aws cloudformation create-stack --profile $profile --region $region --stack-name $stackname --template-body (open $fname | str join) --capabilities CAPABILITY_NAMED_IAM | from json
+        aws cloudformation create-stack --profile $profile --region $region --stack-name $stackname --template-body file://($fname) --capabilities CAPABILITY_NAMED_IAM | from json
     }
 }
 

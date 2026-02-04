@@ -6,15 +6,16 @@ alias iam-list-policies = aws-list-cmd iam list-policies Policies PolicyName
 def iam-create-policy [
     policyname?: string  # Policy name
     fname?: string       # Filename with policy JSON
-    --profile: string    # AWS profile to use
+    --profile: string@profiles = ""    # AWS profile to use
+    --region: string@regions = "us-east-1"  # AWS region to use
 ] {
     let policy_name = if $policyname == null { gum input --placeholder "Policy Name" } else { $policyname }
     let file_name = if $fname == null { gum file } else { $fname }
 
     if $profile == null {
-        aws iam create-policy --policy-name $policy_name --policy-document (open $file_name | str join) | from json
+        aws iam create-policy --policy-name $policy_name --policy-document $"file://($file_name)" | from json
     } else {
-        aws iam create-policy --policy-name $policy_name --policy-document (open $file_name | str join) --profile $profile | from json
+        aws iam create-policy --policy-name $policy_name --policy-document $"file://($file_name)" --profile $profile | from json
     }
 }
 
@@ -160,7 +161,7 @@ def iam-edit-role-trust-policy [
     }
 }
 
-def add-policy-to-role [
+def iam-add-policy-to-role [
     --role-name: string = "",  # Role name (optional, will prompt if not provided)
     --policy-arn: string = "",  # Policy ARN (optional, will prompt if not provided)
     --profile: string@profiles = "",  # AWS profile to use
@@ -246,7 +247,7 @@ def add-inline-policy-to-role [
     print $"Successfully added inline policy ($policy_name_final) to role ($role)"
 }
 
-def create-iam-role-with-role-trust [
+def iam-create-role-with-role-trust [
     role_name?: string,  # Role name
     trusted_role_arn?: string,  # ARN of the role to trust
     --profile: string@profiles = "",  # AWS profile to use
@@ -295,7 +296,7 @@ def create-iam-role-with-role-trust [
     $cmd | from json
 }
 
-def create-iam-role-with-service-trust [
+def iam-create-role-with-service-trust [
     role_name?: string,  # Role name
     service_name?: string,  # AWS service name (e.g., lambda, ec2, ecs-tasks)
     --profile: string@profiles = "",  # AWS profile to use
